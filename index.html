@@ -118,6 +118,7 @@ function App() {
   var ms = useState(null); var modal=ms[0],setModal=ms[1];
   var ems = useState(null); var editModal=ems[0],setEditModal=ems[1];
   var fs = useState({type:"CE",personId:1,note:"",startTime:"",endTime:""}); var form=fs[0],setForm=fs[1];
+  var nts = useState(""); var noteInput=nts[0],setNoteInput=nts[1];
   var ens = useState(null); var editingName=ens[0],setEditingName=ens[1];
   var nis = useState(""); var nameInput=nis[0],setNameInput=nis[1];
   var ts = useState(false); var toast=ts[0],setToast=ts[1];
@@ -161,8 +162,8 @@ function App() {
     return MONTHS[wk.getMonth()]+" "+wk.getDate()+" - "+(wk.getMonth()!==end.getMonth()?MONTHS[end.getMonth()]+' ':'')+end.getDate()+", "+end.getFullYear();
   }
 
-  function openAdd(key){setForm({type:"CE",personId:people[0].id,note:"",startTime:"",endTime:""});setModal(key);}
-  function openEdit(ev,e){e.stopPropagation();setForm({type:ev.type,personId:ev.personId,note:ev.note,startTime:ev.startTime||"",endTime:ev.endTime||""});setEditModal(ev);}
+  function openAdd(key){setForm({type:"CE",personId:people[0].id,note:"",startTime:"",endTime:""});setNoteInput("");setModal(key);}
+  function openEdit(ev,e){e.stopPropagation();setForm({type:ev.type,personId:ev.personId,note:ev.note,startTime:ev.startTime||"",endTime:ev.endTime||""});setNoteInput(ev.note||"");setEditModal(ev);}
 
   var syncColor={idle:"#aaa",saving:"#E08A2E",saved:"#4CAF6F",error:"#D45050"}[sync];
   var syncLabel={idle:"synced",saving:"saving...",saved:"saved",error:"sync error"}[sync];
@@ -236,9 +237,11 @@ function App() {
       ),
       h("div",{style:{marginBottom:12}},
         h("label",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#888",letterSpacing:1,display:"block",marginBottom:6}},"NOTE (optional)"),
-        h("input",{value:form.note,onChange:function(e){var v=e.target.value;setForm({type:form.type,personId:form.personId,note:v,startTime:form.startTime,endTime:form.endTime});},placeholder:"e.g. Location, topic...",style:{width:"100%",padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Sans',sans-serif",fontSize:13,background:"#FAFAFA"}})
+        h("input",{value:noteInput,onChange:function(e){setNoteInput(e.target.value);},onBlur:function(e){var v=e.target.value;setForm(function(f){return {type:f.type,personId:f.personId,note:v,startTime:f.startTime,endTime:f.endTime};});},placeholder:"e.g. Location, topic...",style:{width:"100%",padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Sans',sans-serif",fontSize:13,background:"#FAFAFA"}})
       ),
-      h("div",{style:{marginBottom:18}},h("div",{style:{display:"flex",gap:8,alignItems:"center"}},
+      h("div",{style:{marginBottom:18}},
+        h("label",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#888",letterSpacing:1,display:"block",marginBottom:6}},"TIME 24hr (optional)"),
+        h("div",{style:{display:"flex",gap:8,alignItems:"center"}},
           h("input",{type:"time",value:form.startTime,onChange:function(e){setForm(function(f){return {type:f.type,personId:f.personId,note:f.note,startTime:e.target.value,endTime:f.endTime};});},style:{flex:1,padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Mono',monospace",fontSize:13,background:"#FAFAFA"}}),
           h("span",{style:{fontFamily:"'DM Mono',monospace",fontSize:12,color:"#aaa"}},"-"),
           h("input",{type:"time",value:form.endTime,onChange:function(e){setForm(function(f){return {type:f.type,personId:f.personId,note:f.note,startTime:f.startTime,endTime:e.target.value};});},style:{flex:1,padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Mono',monospace",fontSize:13,background:"#FAFAFA"}})
