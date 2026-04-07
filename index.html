@@ -37,17 +37,17 @@
 const STORAGE_KEY = "shared-calendar-data";
 
 function getPatternStyle(type, color) {
-  const ec = encodeURIComponent(color);
+  var ec = encodeURIComponent(color);
+  var svg, bg;
   if (type === "CE") {
-    const svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"8\" height=\"8\"><line x1=\"0\" y1=\"8\" x2=\"8\" y2=\"0\" stroke=\"" + ec + "\" stroke-width=\"1.5\" stroke-opacity=\"0.18\"/></svg>";
-    return { backgroundImage: "url(\"data:image/svg+xml," + encodeURIComponent(svg) + "\")", backgroundSize: "8px 8px" };
+    svg = "<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><line x1='0' y1='8' x2='8' y2='0' stroke='" + ec + "' stroke-width='1.5' stroke-opacity='0.18'/></svg>";
   } else if (type === "Meet & Greet") {
-    const svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"8\" height=\"8\"><circle cx=\"4\" cy=\"4\" r=\"1.2\" fill=\"" + ec + "\" fill-opacity=\"0.25\"/></svg>";
-    return { backgroundImage: "url(\"data:image/svg+xml," + encodeURIComponent(svg) + "\")", backgroundSize: "8px 8px" };
+    svg = "<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><circle cx='4' cy='4' r='1.2' fill='" + ec + "' fill-opacity='0.25'/></svg>";
   } else {
-    const svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\"><line x1=\"0\" y1=\"5\" x2=\"10\" y2=\"5\" stroke=\"" + ec + "\" stroke-width=\"1\" stroke-opacity=\"0.2\"/><line x1=\"5\" y1=\"0\" x2=\"5\" y2=\"10\" stroke=\"" + ec + "\" stroke-width=\"1\" stroke-opacity=\"0.2\"/></svg>";
-    return { backgroundImage: "url(\"data:image/svg+xml," + encodeURIComponent(svg) + "\")", backgroundSize: "10px 10px" };
+    svg = "<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><line x1='0' y1='5' x2='10' y2='5' stroke='" + ec + "' stroke-width='1' stroke-opacity='0.2'/><line x1='5' y1='0' x2='5' y2='10' stroke='" + ec + "' stroke-width='1' stroke-opacity='0.2'/></svg>";
   }
+  bg = "url('data:image/svg+xml," + encodeURIComponent(svg) + "')";
+  return { backgroundImage: bg, backgroundSize: type === "Hold" ? "10px 10px" : "8px 8px" };
 }
 
 function timeLabel(start, end) {
