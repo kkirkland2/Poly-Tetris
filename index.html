@@ -14,14 +14,16 @@
 </head>
 <body>
   <div id="root"></div>
+  <script>
+    window.SUPABASE_URL = "https://wziyuvjnnzkkghyxpkkj.supabase.co";
+    window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aXl1dmpubnpra2doeXhwa2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDg1MTQsImV4cCI6MjA5MTA4NDUxNH0.m33U3tfU4lq3RuQfR0FybM6pgRvRaV67jT8h4IYaP7Y";
+  </script>
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
-    const SUPABASE_URL = "https://wziyuvjnnzkkghyxpkkj.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aXl1dmpubnpra2doeXhwa2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDg1MTQsImV4cCI6MjA5MTA4NDUxNH0.m33U3tfU4lq3RuQfR0FybM6pgRvRaV67jT8h4IYaP7Y";
 
 ```
 function getDB() {
-  return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
 }
 const STORAGE_KEY = "shared-calendar-data";
 
