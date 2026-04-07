@@ -29,6 +29,18 @@
     window.saveToSupabase = function(payload) {
       return window.getDB().from("calendar_data").upsert({ key: "shared-calendar-data", value: JSON.stringify(payload), updated_at: new Date().toISOString() });
     };
+    window.getPatternStyle = function(type, color) {
+      var ec = encodeURIComponent(color);
+      var svg;
+      if (type === "CE") {
+        svg = "<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><line x1='0' y1='8' x2='8' y2='0' stroke='" + ec + "' stroke-width='1.5' stroke-opacity='0.18'/></svg>";
+      } else if (type === "Meet & Greet") {
+        svg = "<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><circle cx='4' cy='4' r='1.2' fill='" + ec + "' fill-opacity='0.25'/></svg>";
+      } else {
+        svg = "<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><line x1='0' y1='5' x2='10' y2='5' stroke='" + ec + "' stroke-width='1' stroke-opacity='0.2'/><line x1='5' y1='0' x2='5' y2='10' stroke='" + ec + "' stroke-width='1' stroke-opacity='0.2'/></svg>";
+      }
+      return { backgroundImage: "url('data:image/svg+xml," + encodeURIComponent(svg) + "')", backgroundSize: type === "Hold" ? "10px 10px" : "8px 8px" };
+    };
   </script>
   <script type="text/babel" data-presets="react,env">
     const { useState, useEffect, useRef } = React;
@@ -36,19 +48,7 @@
 ```
 const STORAGE_KEY = "shared-calendar-data";
 
-function getPatternStyle(type, color) {
-  var ec = encodeURIComponent(color);
-  var svg, bg;
-  if (type === "CE") {
-    svg = "<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><line x1='0' y1='8' x2='8' y2='0' stroke='" + ec + "' stroke-width='1.5' stroke-opacity='0.18'/></svg>";
-  } else if (type === "Meet & Greet") {
-    svg = "<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><circle cx='4' cy='4' r='1.2' fill='" + ec + "' fill-opacity='0.25'/></svg>";
-  } else {
-    svg = "<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><line x1='0' y1='5' x2='10' y2='5' stroke='" + ec + "' stroke-width='1' stroke-opacity='0.2'/><line x1='5' y1='0' x2='5' y2='10' stroke='" + ec + "' stroke-width='1' stroke-opacity='0.2'/></svg>";
-  }
-  bg = "url('data:image/svg+xml," + encodeURIComponent(svg) + "')";
-  return { backgroundImage: bg, backgroundSize: type === "Hold" ? "10px 10px" : "8px 8px" };
-}
+
 
 function timeLabel(start, end) {
   if (!start) return null;
@@ -58,7 +58,7 @@ function timeLabel(start, end) {
 function EventChip({ ev, person, onClick, compact }) {
   const time = timeLabel(ev.startTime, ev.endTime);
   const border = "1.5px solid " + person.color;
-  const ps = getPatternStyle(ev.type, person.color);
+  const ps = window.getPatternStyle(ev.type, person.color);
   const chipStyle = Object.assign({overflow:"hidden",background:person.light,border:border,borderRadius:compact?5:6,padding:compact?"2px 5px":"4px 7px",fontSize:compact?10:11,color:person.color,fontWeight:600,fontFamily:"'DM Mono',monospace",whiteSpace:compact?"nowrap":"normal",cursor:"pointer"}, ps);
   return (
     <div onClick={onClick} style={chipStyle}>
@@ -251,7 +251,7 @@ function App() {
             ))}
           </div>
           <div style={{borderTop:"1px solid #F0F0F0",paddingTop:8,display:"flex",gap:14}}>
-            {EVENT_TYPES.map(t=><div key={t} style={{display:"flex",alignItems:"center",gap:6}}><div style={{width:26,height:14,borderRadius:4,background:"#E8E8E8",border:"1.5px solid #ccc",...getPatternStyle(t,"#555")}}/><span style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#666",fontWeight:600}}>{t}</span></div>)}
+            {EVENT_TYPES.map(t=><div key={t} style={{display:"flex",alignItems:"center",gap:6}}><div style={{width:26,height:14,borderRadius:4,background:"#E8E8E8",border:"1.5px solid #ccc",...window.getPatternStyle(t,"#555")}}/><span style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#666",fontWeight:600}}>{t}</span></div>)}
           </div>
         </div>
 
