@@ -25,12 +25,13 @@ function getDB() {
 }
 const STORAGE_KEY = "shared-calendar-data";
 
-async function loadFromSupabase() {
-  const { data } = await getDB().from("calendar_data").select("value").eq("key", STORAGE_KEY).single();
-  return data ? JSON.parse(data.value) : null;
+function loadFromSupabase() {
+  return getDB().from("calendar_data").select("value").eq("key", STORAGE_KEY).single().then(function(res) {
+    return res.data ? JSON.parse(res.data.value) : null;
+  });
 }
-async function saveToSupabase(payload) {
-  await getDB().from("calendar_data").upsert({ key: STORAGE_KEY, value: JSON.stringify(payload), updated_at: new Date().toISOString() });
+function saveToSupabase(payload) {
+  return getDB().from("calendar_data").upsert({ key: STORAGE_KEY, value: JSON.stringify(payload), updated_at: new Date().toISOString() });
 }
 
 function getPatternStyle(type, color) {
