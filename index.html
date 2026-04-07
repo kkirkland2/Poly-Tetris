@@ -220,8 +220,8 @@ function App() {
     );
   }
 
-  // Modal form fields
-  function FormFields(){
+  // Modal form fields - plain function, not a component, to avoid remount
+  function renderFormFields(){
     var typeBtns=EVENT_TYPES.map(function(t){
       return h("button",{key:t,onClick:function(){setForm(function(f){return {type:t,personId:f.personId,note:f.note,startTime:f.startTime,endTime:f.endTime};});},style:{flex:1,padding:"8px 0",borderRadius:8,cursor:"pointer",fontWeight:600,fontFamily:"'DM Mono',monospace",fontSize:11,background:form.type===t?"#1A1A2E":"#F5F4F0",color:form.type===t?"#E08A2E":"#777",border:form.type===t?"2px solid #1A1A2E":"2px solid transparent"}},t);
     });
@@ -237,7 +237,7 @@ function App() {
       ),
       h("div",{style:{marginBottom:12}},
         h("label",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#888",letterSpacing:1,display:"block",marginBottom:6}},"NOTE (optional)"),
-        h("input",{value:noteInput,onChange:function(e){setNoteInput(e.target.value);},onBlur:function(e){var v=e.target.value;setForm(function(f){return {type:f.type,personId:f.personId,note:v,startTime:f.startTime,endTime:f.endTime};});},placeholder:"e.g. Location, topic...",style:{width:"100%",padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Sans',sans-serif",fontSize:13,background:"#FAFAFA"}})
+        h("input",{value:noteInput,onChange:function(e){setNoteInput(e.target.value);},placeholder:"e.g. Location, topic...",style:{width:"100%",padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Sans',sans-serif",fontSize:13,background:"#FAFAFA"}})
       ),
       h("div",{style:{marginBottom:18}},
         h("label",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#888",letterSpacing:1,display:"block",marginBottom:6}},"TIME 24hr (optional)"),
@@ -329,10 +329,10 @@ function App() {
       h("div",{onClick:function(e){e.stopPropagation();},style:mb},
         h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#E08A2E",letterSpacing:2,marginBottom:4}},"NEW EVENT"),
         h("div",{style:{fontSize:16,fontWeight:700,color:"#1A1A2E",marginBottom:16}},modal),
-        h(FormFields,null),
+        renderFormFields(),
         h("div",{style:{display:"flex",gap:8}},
           h("button",{onClick:function(){setModal(null);},style:{flex:1,padding:"9px 0",borderRadius:9,background:"#F5F4F0",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:12,color:"#888",fontWeight:600}},"Cancel"),
-          h("button",{onClick:function(){if(!modal)return;updEv(events.concat([{id:Date.now(),date:modal,type:form.type,personId:form.personId,note:form.note,startTime:form.startTime,endTime:form.endTime}]));setModal(null);},style:{flex:2,padding:"9px 0",borderRadius:9,background:"#1A1A2E",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:12,color:"#E08A2E",fontWeight:700}},"ADD EVENT")
+          h("button",{onClick:function(){if(!modal)return;updEv(events.concat([{id:Date.now(),date:modal,type:form.type,personId:form.personId,note:noteInput,startTime:form.startTime,endTime:form.endTime}]));setModal(null);},style:{flex:2,padding:"9px 0",borderRadius:9,background:"#1A1A2E",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:12,color:"#E08A2E",fontWeight:700}},"ADD EVENT")
         )
       )
     ):null,
@@ -342,11 +342,11 @@ function App() {
       h("div",{onClick:function(e){e.stopPropagation();},style:mb},
         h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#3A7FD5",letterSpacing:2,marginBottom:4}},"EDIT EVENT"),
         h("div",{style:{fontSize:16,fontWeight:700,color:"#1A1A2E",marginBottom:16}},editModal.date),
-        h(FormFields,null),
+        renderFormFields(),
         h("div",{style:{display:"flex",gap:8}},
           h("button",{onClick:function(){updEv(events.filter(function(e){return e.id!==editModal.id;}));setEditModal(null);},style:{flex:1,padding:"9px 0",borderRadius:9,background:"#FEE8E8",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#D45050",fontWeight:700}},"DELETE"),
           h("button",{onClick:function(){setEditModal(null);},style:{flex:1,padding:"9px 0",borderRadius:9,background:"#F5F4F0",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#888",fontWeight:600}},"Cancel"),
-          h("button",{onClick:function(){updEv(events.map(function(e){return e.id===editModal.id?{id:e.id,date:e.date,type:form.type,personId:form.personId,note:form.note,startTime:form.startTime,endTime:form.endTime}:e;}));setEditModal(null);},style:{flex:2,padding:"9px 0",borderRadius:9,background:"#1A1A2E",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#E08A2E",fontWeight:700}},"SAVE")
+          h("button",{onClick:function(){updEv(events.map(function(e){return e.id===editModal.id?{id:e.id,date:e.date,type:form.type,personId:form.personId,note:noteInput,startTime:form.startTime,endTime:form.endTime}:e;}));setEditModal(null);},style:{flex:2,padding:"9px 0",borderRadius:9,background:"#1A1A2E",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#E08A2E",fontWeight:700}},"SAVE")
         )
       )
     ):null
