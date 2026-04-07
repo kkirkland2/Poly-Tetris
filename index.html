@@ -236,10 +236,9 @@ function App() {
       ),
       h("div",{style:{marginBottom:12}},
         h("label",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#888",letterSpacing:1,display:"block",marginBottom:6}},"NOTE (optional)"),
-        h("input",{value:form.note,onChange:function(e){var v=e.target.value;setForm({type:form.type,personId:form.personId,note:v,startTime:form.startTime,endTime:form.endTime});},placeholder:"e.g. Location, topic...",style:{width:"100%",padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Sans',sans-serif",fontSize:13,background:"#FAFAFA"}}),
-      h("div",{style:{marginBottom:18}},
-        h("label",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#888",letterSpacing:1,display:"block",marginBottom:6}},"TIME 24hr (optional)"),
-        h("div",{style:{display:"flex",gap:8,alignItems:"center"}},
+        h("input",{value:form.note,onChange:function(e){var v=e.target.value;setForm({type:form.type,personId:form.personId,note:v,startTime:form.startTime,endTime:form.endTime});},placeholder:"e.g. Location, topic...",style:{width:"100%",padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Sans',sans-serif",fontSize:13,background:"#FAFAFA"}})
+      ),
+      h("div",{style:{marginBottom:18}},h("div",{style:{display:"flex",gap:8,alignItems:"center"}},
           h("input",{type:"time",value:form.startTime,onChange:function(e){setForm(function(f){return {type:f.type,personId:f.personId,note:f.note,startTime:e.target.value,endTime:f.endTime};});},style:{flex:1,padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Mono',monospace",fontSize:13,background:"#FAFAFA"}}),
           h("span",{style:{fontFamily:"'DM Mono',monospace",fontSize:12,color:"#aaa"}},"-"),
           h("input",{type:"time",value:form.endTime,onChange:function(e){setForm(function(f){return {type:f.type,personId:f.personId,note:f.note,startTime:f.startTime,endTime:e.target.value};});},style:{flex:1,padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Mono',monospace",fontSize:13,background:"#FAFAFA"}})
