@@ -18,17 +18,17 @@
     const { useState, useEffect, useRef } = React;
     const SUPABASE_URL = "https://wziyuvjnnzkkghyxpkkj.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aXl1dmpubnpra2doeXhwa2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDg1MTQsImV4cCI6MjA5MTA4NDUxNH0.m33U3tfU4lq3RuQfR0FybM6pgRvRaV67jT8h4IYaP7Y";
-    const createClient = (window.supabase && window.supabase.createClient) || (window.supabaseJs && window.supabaseJs.createClient) || window.createClient;
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const STORAGE_KEY = "shared-calendar-data";
 
 ```
 async function loadFromSupabase() {
-  const { data } = await supabase.from("calendar_data").select("value").eq("key", STORAGE_KEY).single();
+  const { data } = await db.from("calendar_data").select("value").eq("key", STORAGE_KEY).single();
   return data ? JSON.parse(data.value) : null;
 }
 async function saveToSupabase(payload) {
-  await supabase.from("calendar_data").upsert({ key: STORAGE_KEY, value: JSON.stringify(payload), updated_at: new Date().toISOString() });
+  await db.from("calendar_data").upsert({ key: STORAGE_KEY, value: JSON.stringify(payload), updated_at: new Date().toISOString() });
 }
 
 function getPatternStyle(type, color) {
