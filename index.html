@@ -51,8 +51,11 @@ function timeLabel(start, end) {
 
 function EventChip({ ev, person, onClick, compact }) {
   const time = timeLabel(ev.startTime, ev.endTime);
+  const border = "1.5px solid " + person.color;
+  const ps = getPatternStyle(ev.type, person.color);
+  const chipStyle = Object.assign({overflow:"hidden",background:person.light,border:border,borderRadius:compact?5:6,padding:compact?"2px 5px":"4px 7px",fontSize:compact?10:11,color:person.color,fontWeight:600,fontFamily:"'DM Mono',monospace",whiteSpace:compact?"nowrap":"normal",cursor:"pointer"}, ps);
   return (
-    <div onClick={onClick} style={{overflow:"hidden",background:person.light,border:`1.5px solid ${person.color}`,borderRadius:compact?5:6,padding:compact?"2px 5px":"4px 7px",fontSize:compact?10:11,color:person.color,fontWeight:600,fontFamily:"'DM Mono',monospace",whiteSpace:compact?"nowrap":"normal",cursor:"pointer",...getPatternStyle(ev.type,person.color)}}>
+    <div onClick={onClick} style={chipStyle}>
       {compact
         ? (ev.type + " - " + person.name + (time ? " " + time : ""))
         : <><div>{ev.type}</div><div style={{fontWeight:400,color:"#555"}}>{person.name}</div>{time&&<div style={{fontWeight:600,fontSize:10,color:person.color,opacity:.8,marginTop:1}}>{time}</div>}{ev.note&&<div style={{fontWeight:400,fontSize:10,color:"#777"}}>{ev.note}</div>}</>}
@@ -80,13 +83,13 @@ const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const getToday = () => { const d=new Date(); return {year:d.getFullYear(),month:d.getMonth(),day:d.getDate()}; };
 const daysInMonth = (y,m) => new Date(y,m+1,0).getDate();
 const firstDay = (y,m) => new Date(y,m,1).getDay();
-const dateKey = (y,m,d) => `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+const dateKey = (y,m,d) => y + "-" + String(m+1).padStart(2,'0') + "-" + String(d).padStart(2,'0');
 
 function exportICS(events, people) {
   const gp = id => people.find(p=>p.id===id)||people[0];
   const fmt = ds => ds.replace(/-/g,"")+"T090000Z";
   const lines = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//CE Scheduler//EN","CALSCALE:GREGORIAN"];
-  events.forEach(ev => { const p=gp(ev.personId); lines.push("BEGIN:VEVENT",`UID:${ev.id}@s`,`DTSTART:${fmt(ev.date)}`,`DTEND:${fmt(ev.date)}`,`SUMMARY:${ev.type} — ${p.name}`,`DESCRIPTION:${ev.note||""}`, "END:VEVENT"); });
+  events.forEach(ev => { const p=gp(ev.personId); lines.push("BEGIN:VEVENT","UID:"+ev.id+"@s","DTSTART:"+fmt(ev.date),"DTEND:"+fmt(ev.date),"SUMMARY:"+ev.type+" - "+p.name,"DESCRIPTION:"+(ev.note||""), "END:VEVENT"); });
   lines.push("END:VCALENDAR");
   const blob = new Blob([lines.join("\r\n")],{type:"text/calendar"});
   const url = URL.createObjectURL(blob);
@@ -157,7 +160,7 @@ function App() {
       <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:2}}>
         {DAYS.map(d=><div key={d} style={{textAlign:"center",fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:600,color:"#888",padding:"6px 0",letterSpacing:1}}>{d}</div>)}
         {cells.map((day,i)=>{
-          if(!day) return <div key={`e-${i}`} style={{minHeight:80,background:"#FAFAFA",borderRadius:8}}/>;
+          if(!day) return <div key={"e-"+i} style={{minHeight:80,background:"#FAFAFA",borderRadius:8}}/>;
           const key=dateKey(cur.year,cur.month,day);
           const evs=events.filter(e=>e.date===key);
           const isToday=cur.year===today.year&&cur.month===today.month&&day===today.day;
@@ -190,7 +193,7 @@ function App() {
           const evs=events.filter(e=>e.date===key);
           const isToday=d.getFullYear()===today.year&&d.getMonth()===today.month&&d.getDate()===today.day;
           return (
-            <div key={`c-${i}`} onClick={()=>{setForm({type:"CE",personId:people[0].id,note:"",startTime:"",endTime:""});setModal(key);}} style={{minHeight:200,background:isToday?"#FFF8EC":"#fff",border:isToday?"2px solid #E08A2E":"1px solid #ECECEC",borderRadius:8,padding:6,cursor:"pointer",boxShadow:"0 1px 3px rgba(0,0,0,.05)"}}
+            <div key={"c-"+i} onClick={()=>{setForm({type:"CE",personId:people[0].id,note:"",startTime:"",endTime:""});setModal(key);}} style={{minHeight:200,background:isToday?"#FFF8EC":"#fff",border:isToday?"2px solid #E08A2E":"1px solid #ECECEC",borderRadius:8,padding:6,cursor:"pointer",boxShadow:"0 1px 3px rgba(0,0,0,.05)"}}
               onMouseEnter={e=>e.currentTarget.style.boxShadow="0 3px 10px rgba(0,0,0,.13)"}
               onMouseLeave={e=>e.currentTarget.style.boxShadow="0 1px 3px rgba(0,0,0,.05)"}>
               <div style={{display:"flex",flexDirection:"column",gap:3}}>
@@ -233,7 +236,7 @@ function App() {
           <div style={{fontFamily:"'DM Mono',monospace",fontSize:10,color:"#aaa",letterSpacing:2,marginBottom:8}}>TEAM — click to rename</div>
           <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}}>
             {people.map(p=>(
-              <div key={p.id} style={{display:"flex",alignItems:"center",gap:5,background:p.light,border:`1.5px solid ${p.color}`,borderRadius:20,padding:"4px 10px",cursor:"pointer"}} onClick={()=>{setEditingName(p.id);setNameInput(p.name);}}>
+              <div key={p.id} style={{display:"flex",alignItems:"center",gap:5,background:p.light,border:"1.5px solid "+p.color,borderRadius:20,padding:"4px 10px",cursor:"pointer"}} onClick={()=>{setEditingName(p.id);setNameInput(p.name);}}>
                 <div style={{width:8,height:8,borderRadius:"50%",background:p.color}}/>
                 {editingName===p.id
                   ?<input autoFocus value={nameInput} onChange={e=>setNameInput(e.target.value)} onBlur={()=>saveName(p.id)} onKeyDown={e=>e.key==="Enter"&&saveName(p.id)} style={{border:"none",background:"transparent",color:p.color,fontWeight:700,fontFamily:"'DM Mono',monospace",fontSize:12,width:70,outline:"none"}}/>
@@ -249,7 +252,7 @@ function App() {
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
           <button onClick={view==="month"?(()=>setCur(c=>c.month===0?{year:c.year-1,month:11}:{...c,month:c.month-1})):(()=>setWk(d=>{const n=new Date(d);n.setDate(n.getDate()-7);return n;}))} style={{background:"#fff",border:"1px solid #E0E0E0",borderRadius:8,padding:"6px 14px",cursor:"pointer",fontSize:16,fontWeight:600,color:"#555"}}>‹</button>
           <div style={{fontFamily:"'DM Mono',monospace",fontWeight:600,fontSize:14,color:"#1A1A2E"}}>
-            {view==="month"?`${MONTHS[cur.month]} ${cur.year}`:weekLabel()}
+            {view==="month"?(MONTHS[cur.month]+" "+cur.year):weekLabel()}
           </div>
           <button onClick={view==="month"?(()=>setCur(c=>c.month===11?{year:c.year+1,month:0}:{...c,month:c.month+1})):(()=>setWk(d=>{const n=new Date(d);n.setDate(n.getDate()+7);return n;}))} style={{background:"#fff",border:"1px solid #E0E0E0",borderRadius:8,padding:"6px 14px",cursor:"pointer",fontSize:16,fontWeight:600,color:"#555"}}>›</button>
         </div>
@@ -275,7 +278,7 @@ function App() {
             <div style={{marginBottom:12}}>
               <label style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#888",letterSpacing:1,display:"block",marginBottom:6}}>PERSON</label>
               <select value={form.personId} onChange={e=>setForm(f=>({...f,personId:Number(e.target.value)}))} style={{width:"100%",padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Sans',sans-serif",fontSize:14,background:"#FAFAFA",color:"#1A1A2E"}}>
-                {people.map(p=><option key={p.id} value={p.id}>{p.name||`Person ${p.id}`}</option>)}
+                {people.map(p=><option key={p.id} value={p.id}>{p.name||("Person "+p.id)}</option>)}
               </select>
             </div>
             <div style={{marginBottom:18}}>
@@ -312,7 +315,7 @@ function App() {
             <div style={{marginBottom:12}}>
               <label style={{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#888",letterSpacing:1,display:"block",marginBottom:6}}>PERSON</label>
               <select value={form.personId} onChange={e=>setForm(f=>({...f,personId:Number(e.target.value)}))} style={{width:"100%",padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Sans',sans-serif",fontSize:14,background:"#FAFAFA",color:"#1A1A2E"}}>
-                {people.map(p=><option key={p.id} value={p.id}>{p.name||`Person ${p.id}`}</option>)}
+                {people.map(p=><option key={p.id} value={p.id}>{p.name||("Person "+p.id)}</option>)}
               </select>
             </div>
             <div style={{marginBottom:18}}>
