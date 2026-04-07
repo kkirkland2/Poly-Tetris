@@ -271,7 +271,7 @@ function App() {
       h("div",{style:{width:8,height:8,borderRadius:"50%",background:p.color}}),
       editingName===p.id
         ? h("input",{autoFocus:true,value:nameInput,onChange:function(e){setNameInput(e.target.value);},onBlur:function(){saveName(p.id);},onKeyDown:function(e){if(e.key==="Enter")saveName(p.id);},style:{border:"none",background:"transparent",color:p.color,fontWeight:700,fontFamily:"'DM Mono',monospace",fontSize:11,width:70,outline:"none"}})
-        : h("span",{style:{color:p.color,fontWeight:700,fontFamily:"'DM Mono',monospace",fontSize:11}},p.name||"—")
+        : h("span",{style:{color:p.color,fontWeight:700,fontFamily:"'DM Mono',monospace",fontSize:11}},p.name||"-")
     );
   });
 
@@ -326,7 +326,7 @@ function App() {
     // Add modal
     modal?h("div",{style:ov,onClick:function(){setModal(null);}},
       h("div",{onClick:function(e){e.stopPropagation();},style:mb},
-        h("div",{style:{fontFamily:'DM Mono',monospace",fontSize:11,color:"#E08A2E",letterSpacing:2,marginBottom:4}},"NEW EVENT"),
+        h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#E08A2E",letterSpacing:2,marginBottom:4}},"NEW EVENT"),
         h("div",{style:{fontSize:16,fontWeight:700,color:"#1A1A2E",marginBottom:16}},modal),
         h(FormFields,null),
         h("div",{style:{display:"flex",gap:8}},
