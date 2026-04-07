@@ -8,7 +8,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>*{box-sizing:border-box;margin:0;padding:0;}body{background:#F5F4F0;}</style>
 </head>
@@ -18,7 +18,8 @@
     const { useState, useEffect, useRef } = React;
     const SUPABASE_URL = "https://wziyuvjnnzkkghyxpkkj.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aXl1dmpubnpra2doeXhwa2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDg1MTQsImV4cCI6MjA5MTA4NDUxNH0.m33U3tfU4lq3RuQfR0FybM6pgRvRaV67jT8h4IYaP7Y";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const createClient = (window.supabase && window.supabase.createClient) || (window.supabaseJs && window.supabaseJs.createClient) || window.createClient;
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const STORAGE_KEY = "shared-calendar-data";
 
 ```
