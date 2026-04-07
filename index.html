@@ -20,10 +20,10 @@ var useEffect = React.useEffect;
 var useRef = React.useRef;
 
 // Supabase
-var SURL = “https://wziyuvjnnzkkghyxpkkj.supabase.co”;
-var SKEY = “eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9” + “.” + “eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aXl1dmpubnpra2doeXhwa2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDg1MTQsImV4cCI6MjA5MTA4NDUxNH0” + “.” + “m33U3tfU4lq3RuQfR0FybM6pgRvRaV67jT8h4IYaP7Y”;
+var SURL = "https://wziyuvjnnzkkghyxpkkj.supabase.co";
+var SKEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" + ""."" + "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aXl1dmpubnpra2doeXhwa2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDg1MTQsImV4cCI6MjA5MTA4NDUxNH0" + ""."" + "m33U3tfU4lq3RuQfR0FybM6pgRvRaV67jT8h4IYaP7Y";
 var DB = window.supabase.createClient(SURL, SKEY);
-var DBKEY = “shared-calendar-data”;
+var DBKEY = “shared-calendar-data";
 
 function dbLoad() {
 return DB.from(“calendar_data”).select(“value”).eq(“key”, DBKEY).single().then(function(r) {
