@@ -46,7 +46,7 @@ function getPatternStyle(type, color) {
 
 function timeLabel(start, end) {
   if (!start) return null;
-  return end ? `${start} – ${end}` : start;
+  return end ? (start + " - " + end) : start;
 }
 
 function EventChip({ ev, person, onClick, compact }) {
@@ -54,7 +54,7 @@ function EventChip({ ev, person, onClick, compact }) {
   return (
     <div onClick={onClick} style={{overflow:"hidden",background:person.light,border:`1.5px solid ${person.color}`,borderRadius:compact?5:6,padding:compact?"2px 5px":"4px 7px",fontSize:compact?10:11,color:person.color,fontWeight:600,fontFamily:"'DM Mono',monospace",whiteSpace:compact?"nowrap":"normal",cursor:"pointer",...getPatternStyle(ev.type,person.color)}}>
       {compact
-        ? `${ev.type} · ${person.name}${time?' '+time:''}`
+        ? (ev.type + " - " + person.name + (time ? " " + time : ""))
         : <><div>{ev.type}</div><div style={{fontWeight:400,color:"#555"}}>{person.name}</div>{time&&<div style={{fontWeight:600,fontSize:10,color:person.color,opacity:.8,marginTop:1}}>{time}</div>}{ev.note&&<div style={{fontWeight:400,fontSize:10,color:"#777"}}>{ev.note}</div>}</>}
     </div>
   );
@@ -145,7 +145,7 @@ function App() {
 
   function weekLabel(){
     const end=new Date(wk); end.setDate(end.getDate()+6);
-    return `${MONTHS[wk.getMonth()]} ${wk.getDate()} – ${wk.getMonth()!==end.getMonth()?MONTHS[end.getMonth()]+' ':''}${end.getDate()}, ${end.getFullYear()}`;
+    return MONTHS[wk.getMonth()] + " " + wk.getDate() + " - " + (wk.getMonth()!==end.getMonth()?MONTHS[end.getMonth()]+' ':'') + end.getDate() + ", " + end.getFullYear();
   }
 
   function MonthGrid(){
