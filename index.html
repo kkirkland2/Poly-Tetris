@@ -42,14 +42,14 @@
       return { backgroundImage: "url('data:image/svg+xml," + encodeURIComponent(svg) + "')", backgroundSize: type === "Hold" ? "10px 10px" : "8px 8px" };
     };
   </script>
-  <script type="text/babel" data-presets="react,env">
+  <script type="text/babel">
+    console.log("BABEL START");
     const { useState, useEffect, useRef } = React;
+    console.log("REACT OK");
+    const STORAGE_KEY = "shared-calendar-data";
+    console.log("STORAGE OK");
 
 ```
-const STORAGE_KEY = "shared-calendar-data";
-
-
-
 function timeLabel(start, end) {
   if (!start) return null;
   return end ? (start + " - " + end) : start;
