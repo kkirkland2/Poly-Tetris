@@ -94,14 +94,14 @@ function EventChip(props) {
   var ev=props.ev, person=props.person, onClick=props.onClick, compact=props.compact;
   var time = timeLabel(ev.startTime, ev.endTime);
   var ps = pat(ev.type, person.color);
-  var style = {overflow:"hidden",background:person.light,border:"1.5px solid "+person.color,borderRadius:compact?5:6,padding:compact?"2px 5px":"4px 7px",fontSize:compact?10:11,color:person.color,fontWeight:600,fontFamily:"'DM Mono',monospace",whiteSpace:compact?"nowrap":"normal",cursor:"pointer",backgroundImage:ps.backgroundImage,backgroundSize:ps.backgroundSize};
+  var style = {overflow:"hidden",background:person.light,border:"1.5px solid "+person.color,borderRadius:compact?5:6,padding:compact?"2px 5px":"4px 7px",fontSize:compact?8:10,color:person.color,fontWeight:600,fontFamily:"'DM Mono',monospace",whiteSpace:compact?"nowrap":"normal",cursor:"pointer",backgroundImage:ps.backgroundImage,backgroundSize:ps.backgroundSize};
   var content;
   if(compact) {
     content = ev.type+" - "+person.name+(time?" "+time:"");
   } else {
     var kids = [h("div",{key:"t"},ev.type), h("div",{key:"n",style:{fontWeight:400,color:"#555"}},person.name)];
-    if(time) kids.push(h("div",{key:"tm",style:{fontWeight:600,fontSize:10,opacity:.8}},time));
-    if(ev.note) kids.push(h("div",{key:"nt",style:{fontWeight:400,fontSize:10,color:"#777"}},ev.note));
+    if(time) kids.push(h("div",{key:"tm",style:{fontWeight:600,fontSize:8,opacity:.8}},time));
+    if(ev.note) kids.push(h("div",{key:"nt",style:{fontWeight:400,fontSize:8,color:"#777"}},ev.note));
     content = kids;
   }
   return h("div",{onClick:onClick,style:style},content);
