@@ -61,17 +61,19 @@ function EventChip(props) {
   var person = props.person;
   var onClick = props.onClick;
   var compact = props.compact;
-  const time = timeLabel(ev.startTime, ev.endTime);
-  const border = "1.5px solid " + person.color;
-  const ps = window.getPatternStyle(ev.type, person.color);
-  const chipStyle = Object.assign({overflow:"hidden",background:person.light,border:border,borderRadius:compact?5:6,padding:compact?"2px 5px":"4px 7px",fontSize:compact?10:11,color:person.color,fontWeight:600,fontFamily:"'DM Mono',monospace",whiteSpace:compact?"nowrap":"normal",cursor:"pointer"}, ps);
-  return (
-    <div onClick={onClick} style={chipStyle}>
-      {compact
-        ? (ev.type + " - " + person.name + (time ? " " + time : ""))
-        : <><div>{ev.type}</div><div style={{fontWeight:400,color:"#555"}}>{person.name}</div>{time&&<div style={{fontWeight:600,fontSize:10,color:person.color,opacity:.8,marginTop:1}}>{time}</div>}{ev.note&&<div style={{fontWeight:400,fontSize:10,color:"#777"}}>{ev.note}</div>}</>}
-    </div>
+  var time = timeLabel(ev.startTime, ev.endTime);
+  var border = "1.5px solid " + person.color;
+  var ps = window.getPatternStyle(ev.type, person.color);
+  var chipStyle = Object.assign({}, {overflow:"hidden",background:person.light,border:border,borderRadius:compact?5:6,padding:compact?"2px 5px":"4px 7px",fontSize:compact?10:11,color:person.color,fontWeight:600,fontFamily:"'DM Mono',monospace",whiteSpace:compact?"nowrap":"normal",cursor:"pointer"}, ps);
+  var label = ev.type + " - " + person.name + (time ? " " + time : "");
+  var fullContent = React.createElement(
+    React.Fragment, null,
+    React.createElement("div", null, ev.type),
+    React.createElement("div", {style:{fontWeight:400,color:"#555"}}, person.name),
+    time ? React.createElement("div", {style:{fontWeight:600,fontSize:10,opacity:.8}}, time) : null,
+    ev.note ? React.createElement("div", {style:{fontWeight:400,fontSize:10,color:"#777"}}, ev.note) : null
   );
+  return React.createElement("div", {onClick:onClick, style:chipStyle}, compact ? label : fullContent);
 }
 
 const DEFAULT_PEOPLE = [
