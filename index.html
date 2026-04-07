@@ -48,14 +48,19 @@
     console.log("REACT OK");
     const STORAGE_KEY = "shared-calendar-data";
     console.log("STORAGE OK");
+    console.log("TIMELABEL DEFINING");
+    function timeLabel(start, end) {
+      if (!start) return null;
+      return end ? (start + " - " + end) : start;
+    }
+    console.log("TIMELABEL OK");
 
 ```
-function timeLabel(start, end) {
-  if (!start) return null;
-  return end ? (start + " - " + end) : start;
-}
-
-function EventChip({ ev, person, onClick, compact }) {
+function EventChip(props) {
+  var ev = props.ev;
+  var person = props.person;
+  var onClick = props.onClick;
+  var compact = props.compact;
   const time = timeLabel(ev.startTime, ev.endTime);
   const border = "1.5px solid " + person.color;
   const ps = window.getPatternStyle(ev.type, person.color);
