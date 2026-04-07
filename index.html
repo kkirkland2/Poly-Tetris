@@ -236,7 +236,7 @@ function App() {
       ),
       h("div",{style:{marginBottom:12}},
         h("label",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#888",letterSpacing:1,display:"block",marginBottom:6}},"NOTE (optional)"),
-        h("input",{defaultValue:form.note,onChange:function(e){var v=e.taget.value;setForm(function(f){return {type:f.type,personId:f.personId,note:v,startTime:f.startTime,endTime:f.endTime};});},placeholder:"e.g. Location, topic...",style:{width:"100%",padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Sans',sans-serif",fontSize:13,background:"#FAFAFA"}})
+        h("input",{defaultValue:form.note,onChange:function(e){var v=e.target.value;setForm(function(f){return {type:f.type,personId:f.personId,note:v,startTime:f.startTime,endTime:f.endTime};});},placeholder:"e.g. Location, topic...",style:{width:"100%",padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Sans',sans-serif",fontSize:13,background:"#FAFAFA"}})
       ),
       h("div",{style:{marginBottom:18}},
         h("label",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#888",letterSpacing:1,display:"block",marginBottom:6}},"TIME 24hr (optional)"),
