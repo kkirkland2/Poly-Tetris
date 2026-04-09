@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Poly Tetris</title>
+  <title>Poly Tetris: The Polycule Scheduler</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
@@ -42,7 +42,13 @@ function dbCreateCalendar(id, name, email, password) {
     {id:3,name:"Person 3",color:"#D4BC1A",light:"#FBF8D8"},
     {id:4,name:"Person 4",color:"#4CAF6F",light:"#DFF5E8"},
     {id:5,name:"Person 5",color:"#2EAACC",light:"#D8F3FA"},
-    {id:6,name:"Person 6",color:"#3A7FD5",light:"#D8E9FA"}
+    {id:6,name:"Person 6",color:"#3A7FD5",light:"#D8E9FA"},
+    {id:7,name:"Person 7",color:"#7B52D4",light:"#EDE6FA"},
+    {id:8,name:"Person 8",color:"#C450A8",light:"#F8E0F3"},
+    {id:9,name:"Person 9",color:"#D45050",light:"#FAE0E0"},
+    {id:10,name:"Person 10",color:"#3DA68C",light:"#D7F5EE"},
+    {id:11,name:"Person 11",color:"#6B7FCC",light:"#E3E7FA"},
+    {id:12,name:"Person 12",color:"#C47A3A",light:"#FAF0E2"}
   ];
   return DB.from("calendars").insert({
     id: id,
@@ -412,6 +418,29 @@ function CalendarApp(props) {
   var ov={position:"fixed",inset:0,background:"rgba(0,0,0,.45)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:100};
   var mb={background:"#fff",borderRadius:16,padding:"28px 28px 22px",minWidth:300,maxWidth:"90vw",boxShadow:"0 8px 40px rgba(0,0,0,.18)"};
 
+  var COLORS = [
+    {color:"#E05C5C",light:"#FDEAEA"},{color:"#E08A2E",light:"#FEF0DC"},
+    {color:"#D4BC1A",light:"#FBF8D8"},{color:"#4CAF6F",light:"#DFF5E8"},
+    {color:"#2EAACC",light:"#D8F3FA"},{color:"#3A7FD5",light:"#D8E9FA"},
+    {color:"#7B52D4",light:"#EDE6FA"},{color:"#C450A8",light:"#F8E0F3"},
+    {color:"#D45050",light:"#FAE0E0"},{color:"#3DA68C",light:"#D7F5EE"},
+    {color:"#6B7FCC",light:"#E3E7FA"},{color:"#C47A3A",light:"#FAF0E2"},
+    {color:"#A0522D",light:"#F5EAE0"},{color:"#2E86AB",light:"#D6EEF7"},
+    {color:"#8B5CF6",light:"#EDE9FE"},{color:"#059669",light:"#D1FAE5"}
+  ];
+
+  function addPerson() {
+    var nextId = 1;
+    for(var i=0;i<people.length;i++){if(people[i].id>=nextId)nextId=people[i].id+1;}
+    var colorIdx = (people.length) % COLORS.length;
+    var np = people.concat([{id:nextId,name:"Person "+nextId,color:COLORS[colorIdx].color,light:COLORS[colorIdx].light}]);
+    setPeople(np);
+    setSync("saving");
+    dbSaveCalendar(calId,np,events).then(function(){setSync("saved");setTimeout(function(){setSync("idle");},2000);}).catch(function(){setSync("error");});
+    // Auto-open rename for new person
+    setTimeout(function(){setEditingName(nextId);setNameInput("Person "+nextId);},50);
+  }
+
   var legend=EVENT_TYPES.map(function(t){
     var ps=pat(t,"#555");
     return h("div",{key:t,style:{display:"flex",alignItems:"center",gap:7}},
@@ -449,7 +478,12 @@ function CalendarApp(props) {
     h("div",{style:{maxWidth:1100,margin:"0 auto",padding:"20px 12px"}},
       h("div",{style:{background:"#fff",borderRadius:12,padding:"14px 18px",marginBottom:16,boxShadow:"0 2px 8px rgba(0,0,0,.06)"}},
         h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:10,color:"#aaa",letterSpacing:2,marginBottom:8}},canEdit?"TEAM - click to rename":"TEAM"),
-        h("div",{style:{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}},teamChips),
+        h("div",{style:{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}},
+          teamChips,
+          canEdit?h("div",{onClick:addPerson,style:{display:"flex",alignItems:"center",gap:5,background:"#F5F4F0",border:"1.5px dashed #ccc",borderRadius:20,padding:"4px 12px",cursor:"pointer"}},
+            h("span",{style:{color:"#aaa",fontWeight:700,fontFamily:"'DM Mono',monospace",fontSize:11}},"+ Add Person")
+          ):null
+        ),
         h("div",{style:{borderTop:"1px solid #F0F0F0",paddingTop:8,display:"flex",gap:14}},legend)
       ),
       h("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}},
