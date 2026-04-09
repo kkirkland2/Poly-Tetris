@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Poly Tetris: The Polycule Scheduler</title>
+  <title>Poly Tetris</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
@@ -204,7 +204,7 @@ function LandingPage(props) {
     h("div",{style:{maxWidth:520,width:"100%"}},
       // Hero
       h("div",{style:{textAlign:"center",marginBottom:40}},
-        h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:12,color:"#E08A2E",letterSpacing:4,marginBottom:12}},"POLYCULE SCHEDULER"),
+        h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:12,color:"#E08A2E",letterSpacing:4,marginBottom:12}},"POLY TETRIS"),
         h("h1",{style:{fontSize:36,fontWeight:700,color:"#fff",marginBottom:12,lineHeight:1.2}},"Schedule CE's &\nMeet and Greets"),
         h("p",{style:{fontSize:15,color:"rgba(255,255,255,.6)",lineHeight:1.6}},"Create a shared calendar for your polycule.\nColor-coded, pattern-matched, and shareable.")
       ),
@@ -461,7 +461,7 @@ function CalendarApp(props) {
   return h("div",{style:{minHeight:"100vh",background:"#F5F4F0",paddingBottom:60}},
     h("div",{style:{background:"#1A1A2E",padding:"18px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}},
       h("div",null,
-        h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:10,color:"#E08A2E",letterSpacing:3,marginBottom:2}},"POLYCULE SCHEDULER"),
+        h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:10,color:"#E08A2E",letterSpacing:3,marginBottom:2}},"POLY TETRIS"),
         h("div",{style:{fontSize:18,fontWeight:700,color:"#fff"}},(calName||"Calendar")+(canEdit?"":" (view only)"))
       ),
       h("div",{style:{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}},
