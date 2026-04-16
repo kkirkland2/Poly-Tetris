@@ -79,17 +79,17 @@ function dbFindByEmail(email) {
 }
 
 // Pattern for event type
-function pat(type, color) {
-  var ec = encodeURIComponent(color);
-  var svg;
+function pat(type) {
   if(type==="CE") {
-    svg = "<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><line x1='0' y1='8' x2='8' y2='0' stroke='"+ec+"' stroke-width='1.5' stroke-opacity='0.22'/></svg>";
+    // Diagonal stripes - dark semi-transparent
+    return "repeating-linear-gradient(45deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 2px, transparent 2px, transparent 8px)";
   } else if(type==="Meet & Greet") {
-    svg = "<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><circle cx='4' cy='4' r='1.2' fill='"+ec+"' fill-opacity='0.3'/></svg>";
+    // Dots - using radial gradient
+    return "radial-gradient(circle, rgba(0,0,0,0.2) 1.5px, transparent 1.5px)";
   } else {
-    svg = "<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><line x1='0' y1='5' x2='10' y2='5' stroke='"+ec+"' stroke-width='1' stroke-opacity='0.22'/><line x1='5' y1='0' x2='5' y2='10' stroke='"+ec+"' stroke-width='1' stroke-opacity='0.22'/></svg>";
+    // Crosshatch grid
+    return "repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1.5px, transparent 1.5px, transparent 10px), repeating-linear-gradient(90deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1.5px, transparent 1.5px, transparent 10px)";
   }
-  return "url('data:image/svg+xml,"+encodeURIComponent(svg)+"')";
 }
 
 // Build gradient from multiple people colors
@@ -154,7 +154,6 @@ function EventChip(props) {
   var attendees = attendeeIds.map(function(id){return gp(id);});
   var colors = attendees.map(function(p){return p.color;});
   var gradient = makeGradient(colors);
-  var patBg = pat(ev.type, "#fff");
   var time = timeLabel(ev.startTime, ev.endTime);
   var names = attendees.map(function(p){return p.name;}).join(", ");
 
@@ -171,11 +170,11 @@ function EventChip(props) {
   };
 
   // Pattern overlay div sits on top of gradient
+  var patternBg = pat(ev.type);
   var overlayStyle = {
     position:"absolute", inset:0, pointerEvents:"none",
-    backgroundImage:patBg,
-    backgroundSize:ev.type==="Hold"?"10px 10px":"8px 8px",
-    opacity:0.5
+    backgroundImage:patternBg,
+    backgroundSize:ev.type==="Meet & Greet"?"6px 6px":(ev.type==="Hold"?"10px 10px":"8px 8px")
   };
 
   var content;
@@ -560,9 +559,10 @@ function CalendarApp(props) {
 
   // Pattern legend
   var legend=EVENT_TYPES.map(function(t){
-    var bg=pat(t,"#555");
+    var patternBg=pat(t);
+    var bgSize=t==="Meet & Greet"?"6px 6px":(t==="Hold"?"10px 10px":"8px 8px");
     return h("div",{key:t,style:{display:"flex",alignItems:"center",gap:7}},
-      h("div",{style:{width:26,height:14,borderRadius:4,background:"#3A7FD5",backgroundImage:bg,backgroundSize:t==="Hold"?"10px 10px":"8px 8px"}}),
+      h("div",{style:{width:36,height:16,borderRadius:4,background:"#3A7FD5",backgroundImage:patternBg,backgroundSize:bgSize,boxShadow:"0 1px 3px rgba(0,0,0,.15)"}}),
       h("span",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#666",fontWeight:600}},t)
     );
   });
