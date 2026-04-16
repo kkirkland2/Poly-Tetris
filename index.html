@@ -88,7 +88,9 @@ function pat(type) {
     return "repeating-linear-gradient(135deg, rgba(0,0,0,0.13) 0px, rgba(0,0,0,0.13) 2px, transparent 2px, transparent 6px)";
   } else {
     return "repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1.5px, transparent 1.5px, transparent 10px), repeating-linear-gradient(90deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1.5px, transparent 1.5px, transparent 10px)";
-  }
+  } else if(type==="Date Night") {
+    return "repeating-linear-gradient(90deg, rgba(0,0,0,0.13) 0px, rgba(0,0,0,0.13) 2px, transparent 2px, transparent 8px)";
+  } else {
 }
 
 // Build gradient from multiple people colors
@@ -115,7 +117,7 @@ var COLORS = [
   {color:"#8B5CF6",light:"#EDE9FE"},{color:"#059669",light:"#D1FAE5"}
 ];
 
-var EVENT_TYPES = ["CE","Meet & Greet","Hold","Family Time"];
+var EVENT_TYPES = ["CE","Meet & Greet","Hold","Family Time","Date Night"];
 var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 var DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
