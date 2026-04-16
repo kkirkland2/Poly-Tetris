@@ -143,7 +143,7 @@ function exportICS(events, people) {
   URL.revokeObjectURL(url);
 }
 
-// EventChip with gradient + pattern
+// EventChip with gradient + pattern overlay
 function EventChip(props) {
   var ev=props.ev, people=props.people, onClick=props.onClick, compact=props.compact;
   var onDragStart=props.onDragStart, onDragEnd=props.onDragEnd;
@@ -154,8 +154,9 @@ function EventChip(props) {
   var attendees = attendeeIds.map(function(id){return gp(id);});
   var colors = attendees.map(function(p){return p.color;});
   var gradient = makeGradient(colors);
-  var patBg = pat(ev.type, colors[0]);
+  var patBg = pat(ev.type, "#fff");
   var time = timeLabel(ev.startTime, ev.endTime);
+  var names = attendees.map(function(p){return p.name;}).join(", ");
 
   var chipStyle = {
     overflow:"hidden", borderRadius:compact?5:6,
@@ -163,16 +164,19 @@ function EventChip(props) {
     fontSize:compact?10:11, fontWeight:600,
     fontFamily:"'DM Mono',monospace",
     whiteSpace:compact?"nowrap":"normal",
-    cursor:"grab",
+    cursor:"grab", position:"relative",
     background:gradient,
-    backgroundImage:gradient+", "+patBg,
-    backgroundBlendMode:"normal",
     border:"none",
     boxShadow:"0 1px 3px rgba(0,0,0,.15)"
   };
 
-  var textColor = "#fff";
-  var names = attendees.map(function(p){return p.name;}).join(", ");
+  // Pattern overlay div sits on top of gradient
+  var overlayStyle = {
+    position:"absolute", inset:0, pointerEvents:"none",
+    backgroundImage:patBg,
+    backgroundSize:ev.type==="Hold"?"10px 10px":"8px 8px",
+    opacity:0.5
+  };
 
   var content;
   if(compact) {
@@ -189,12 +193,15 @@ function EventChip(props) {
 
   return h("div",{
     className:"event-chip",
-    onClick:onClick,
+    onClick:function(e){e.stopPropagation();onClick(e);},
     draggable:true,
-    onDragStart:onDragStart,
-    onDragEnd:onDragEnd,
+    onDragStart:function(e){e.stopPropagation();onDragStart(e);},
+    onDragEnd:function(e){e.stopPropagation();onDragEnd(e);},
     style:chipStyle
-  },h("span",{style:{color:textColor,textShadow:"0 1px 2px rgba(0,0,0,.3)"}},content));
+  },
+    h("div",{style:overlayStyle}),
+    h("span",{style:{position:"relative",color:"#fff",textShadow:"0 1px 2px rgba(0,0,0,.4)"}},content)
+  );
 }
 
 //  LANDING PAGE 
@@ -408,19 +415,24 @@ function CalendarApp(props) {
   }
 
   // Drag and drop
+  var justDropped = useRef(false);
   function onDragStart(evId){
     return function(e){
       dragId.current=evId;
       e.dataTransfer.effectAllowed="move";
+      e.dataTransfer.setData("text/plain", evId+"");
     };
   }
   function onDragEnd(){dragId.current=null;}
-  function onDragOver(e){e.preventDefault();e.dataTransfer.dropEffect="move";}
+  function onDragOver(e){e.preventDefault();e.stopPropagation();e.dataTransfer.dropEffect="move";}
   function onDrop(date){
     return function(e){
       e.preventDefault();
+      e.stopPropagation();
       if(!dragId.current||!canEdit)return;
       var id=dragId.current;
+      justDropped.current=true;
+      setTimeout(function(){justDropped.current=false;},100);
       updEv(events.map(function(ev){return ev.id===id?{id:ev.id,date:date,type:ev.type,attendeeIds:ev.attendeeIds,personId:ev.personId,note:ev.note,startTime:ev.startTime,endTime:ev.endTime}:ev;}));
       dragId.current=null;
     };
@@ -496,7 +508,7 @@ function CalendarApp(props) {
       if(dayEvs.length>3)chips.push(h("div",{key:"more",style:{fontSize:10,color:"#aaa",fontFamily:"'DM Mono',monospace"}},"+"+( dayEvs.length-3)+" more"));
       return h("div",{key:key,
         className:"day-cell",
-        onClick:function(){openAdd(key);},
+        onClick:function(){if(justDropped.current)return;openAdd(key);},
         onDragOver:onDragOver,
         onDrop:onDrop(key),
         style:{minHeight:80,background:isToday?"#FFF8EC":"#fff",border:isToday?"2px solid #E08A2E":"1px solid #ECECEC",borderRadius:8,padding:4,cursor:canEdit?"pointer":"default",boxShadow:"0 1px 3px rgba(0,0,0,.05)"}},
@@ -529,7 +541,7 @@ function CalendarApp(props) {
       if(dayEvs.length===0)chips.push(h("div",{key:"empty",style:{fontSize:10,color:"#ddd",fontFamily:"'DM Mono',monospace",marginTop:8,textAlign:"center"}},canEdit?"+ add":""));
       return h("div",{key:"c"+i,
         className:"day-cell",
-        onClick:function(){openAdd(key);},
+        onClick:function(){if(justDropped.current)return;openAdd(key);},
         onDragOver:onDragOver,
         onDrop:onDrop(key),
         style:{minHeight:200,background:isToday?"#FFF8EC":"#fff",border:isToday?"2px solid #E08A2E":"1px solid #ECECEC",borderRadius:8,padding:6,cursor:canEdit?"pointer":"default",boxShadow:"0 1px 3px rgba(0,0,0,.05)"}},
