@@ -81,14 +81,13 @@ function dbFindByEmail(email) {
 // Pattern for event type
 function pat(type) {
   if(type==="CE") {
+    // Diagonal stripes - dark semi-transparent
     return "repeating-linear-gradient(45deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 2px, transparent 2px, transparent 8px)";
   } else if(type==="Meet & Greet") {
+    // Dots - using radial gradient
     return "radial-gradient(circle, rgba(0,0,0,0.2) 1.5px, transparent 1.5px)";
-  } else if(type==="Family Time") {
-    return "repeating-linear-gradient(135deg, rgba(0,0,0,0.13) 0px, rgba(0,0,0,0.13) 2px, transparent 2px, transparent 6px)";
-  } else if(type==="Date Night") {
-    return "repeating-linear-gradient(90deg, rgba(0,0,0,0.13) 0px, rgba(0,0,0,0.13) 2px, transparent 2px, transparent 8px)";
   } else {
+    // Crosshatch grid
     return "repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1.5px, transparent 1.5px, transparent 10px), repeating-linear-gradient(90deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1.5px, transparent 1.5px, transparent 10px)";
   }
 }
@@ -117,7 +116,7 @@ var COLORS = [
   {color:"#8B5CF6",light:"#EDE9FE"},{color:"#059669",light:"#D1FAE5"}
 ];
 
-var EVENT_TYPES = ["CE","Meet & Greet","Hold","Family Time","Date Night"];
+var EVENT_TYPES = ["CE","Meet & Greet","Hold"];
 var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 var DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 
@@ -284,11 +283,11 @@ function PasswordGate(props) {
     h("div",{style:{background:"#fff",borderRadius:16,padding:"32px",maxWidth:400,width:"100%",boxShadow:"0 4px 24px rgba(0,0,0,.1)"}},
       h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#E08A2E",letterSpacing:3,marginBottom:8}},"PROTECTED"),
       h("h2",{style:{fontSize:20,fontWeight:700,color:"#1A1A2E",marginBottom:4}},props.calName),
-      h("p",{style:{fontSize:13,color:"#888",marginBottom:20}},"Enter the password to edit this calendar."),
+      h("p",{style:{fontSize:13,color:"#888",marginBottom:20}},"Enter the password to edit, or view without one."),
       h("input",{type:"password",placeholder:"Password",value:pw,onChange:function(e){setPw(e.target.value);},onKeyDown:function(e){if(e.key==="Enter")check();},style:{width:"100%",padding:"10px 14px",borderRadius:8,border:"1.5px solid #E0E0E0",fontSize:14,background:"#FAFAFA",marginBottom:12}}),
       err&&h("p",{style:{fontSize:13,color:"#D45050",marginBottom:8}},err),
-      h("button",{onClick:check,style:{width:"100%",padding:"12px",borderRadius:10,background:"#1A1A2E",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:13,color:"#E08A2E",fontWeight:700}},"UNLOCK"),
-      h("p",{style:{textAlign:"center",fontSize:12,color:"#aaa",marginTop:12}},"You can still view without a password.")
+      h("button",{onClick:check,style:{width:"100%",padding:"12px",borderRadius:10,background:"#1A1A2E",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:13,color:"#E08A2E",fontWeight:700,marginBottom:10}},"UNLOCK TO EDIT"),
+      h("button",{onClick:props.onViewOnly,style:{width:"100%",padding:"12px",borderRadius:10,background:"#F5F4F0",border:"1.5px solid #E0E0E0",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:13,color:"#888",fontWeight:600}},"VIEW ONLY")
     )
   );
 }
@@ -687,6 +686,7 @@ function Root() {
   var cs=useState(null);var cal=cs[0],setCal=cs[1];
   var us=useState(false);var unlocked=us[0],setUnlocked=us[1];
   var crs=useState(false);var creator=crs[0],setCreator=crs[1];
+  var vos=useState(false);var viewOnly=vos[0],setViewOnly=vos[1];
   var ls=useState(false);var loading=ls[0],setLoading=ls[1];
 
   useEffect(function(){
@@ -716,7 +716,12 @@ function Root() {
   var hasPassword=cal.password&&cal.password.length>0;
   var canEdit=!hasPassword||unlocked||creator;
 
-  if(hasPassword&&!unlocked&&!creator) return h(PasswordGate,{password:cal.password,calName:cal.name,onUnlock:function(){setUnlocked(true);}});
+  if(hasPassword&&!unlocked&&!creator&&!viewOnly) return h(PasswordGate,{
+    password:cal.password,
+    calName:cal.name,
+    onUnlock:function(){setUnlocked(true);},
+    onViewOnly:function(){setViewOnly(true);}
+  });
 
   return h(CalendarApp,{calId:calId,canEdit:canEdit});
 }
