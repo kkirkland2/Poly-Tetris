@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -26,707 +27,722 @@ var useState = React.useState;
 var useEffect = React.useEffect;
 var useRef = React.useRef;
 
-var SURL = "https://wziyuvjnnzkkghyxpkkj.supabase.co";
-var SKEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" + "." + "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aXl1dmpubnpra2doeXhwa2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDg1MTQsImV4cCI6MjA5MTA4NDUxNH0" + "." + "m33U3tfU4lq3RuQfR0FybM6pgRvRaV67jT8h4IYaP7Y";
+var SURL = “https://wziyuvjnnzkkghyxpkkj.supabase.co”;
+var SKEY = “eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9” + “.” + “eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aXl1dmpubnpra2doeXhwa2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MDg1MTQsImV4cCI6MjA5MTA4NDUxNH0” + “.” + “m33U3tfU4lq3RuQfR0FybM6pgRvRaV67jT8h4IYaP7Y”;
 var DB = window.supabase.createClient(SURL, SKEY);
 
 function genId() {
-  var chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-  var id = "cal-";
-  for(var i=0;i<8;i++) id += chars[Math.floor(Math.random()*chars.length)];
-  return id;
+var chars = “abcdefghijklmnopqrstuvwxyz0123456789”;
+var id = “cal-”;
+for(var i=0;i<8;i++) id += chars[Math.floor(Math.random()*chars.length)];
+return id;
 }
 
 function dbCreateCalendar(id, name, email, password) {
-  var defaultPeople = [
-    {id:1,name:"Person 1",color:"#E05C5C",light:"#FDEAEA"},
-    {id:2,name:"Person 2",color:"#E08A2E",light:"#FEF0DC"},
-    {id:3,name:"Person 3",color:"#D4BC1A",light:"#FBF8D8"},
-    {id:4,name:"Person 4",color:"#4CAF6F",light:"#DFF5E8"},
-    {id:5,name:"Person 5",color:"#2EAACC",light:"#D8F3FA"},
-    {id:6,name:"Person 6",color:"#3A7FD5",light:"#D8E9FA"},
-    {id:7,name:"Person 7",color:"#7B52D4",light:"#EDE6FA"},
-    {id:8,name:"Person 8",color:"#C450A8",light:"#F8E0F3"},
-    {id:9,name:"Person 9",color:"#D45050",light:"#FAE0E0"},
-    {id:10,name:"Person 10",color:"#3DA68C",light:"#D7F5EE"},
-    {id:11,name:"Person 11",color:"#6B7FCC",light:"#E3E7FA"},
-    {id:12,name:"Person 12",color:"#C47A3A",light:"#FAF0E2"}
-  ];
-  return DB.from("calendars").insert({
-    id:id, name:name, email:email||null, password:password||null,
-    people:JSON.stringify(defaultPeople), events:JSON.stringify([])
-  });
+var defaultPeople = [
+{id:1,name:“Person 1”,color:”#E05C5C”,light:”#FDEAEA”},
+{id:2,name:“Person 2”,color:”#E08A2E”,light:”#FEF0DC”},
+{id:3,name:“Person 3”,color:”#D4BC1A”,light:”#FBF8D8”},
+{id:4,name:“Person 4”,color:”#4CAF6F”,light:”#DFF5E8”},
+{id:5,name:“Person 5”,color:”#2EAACC”,light:”#D8F3FA”},
+{id:6,name:“Person 6”,color:”#3A7FD5”,light:”#D8E9FA”},
+{id:7,name:“Person 7”,color:”#7B52D4”,light:”#EDE6FA”},
+{id:8,name:“Person 8”,color:”#C450A8”,light:”#F8E0F3”},
+{id:9,name:“Person 9”,color:”#D45050”,light:”#FAE0E0”},
+{id:10,name:“Person 10”,color:”#3DA68C”,light:”#D7F5EE”},
+{id:11,name:“Person 11”,color:”#6B7FCC”,light:”#E3E7FA”},
+{id:12,name:“Person 12”,color:”#C47A3A”,light:”#FAF0E2”}
+];
+return DB.from(“calendars”).insert({
+id:id, name:name, email:email||null, password:password||null,
+people:JSON.stringify(defaultPeople), events:JSON.stringify([])
+});
 }
 
 function dbLoadCalendar(id) {
-  return DB.from("calendars").select("*").eq("id",id).single().then(function(r){
-    if(!r.data) return null;
-    var cal = r.data;
-    cal.people = typeof cal.people==="string" ? JSON.parse(cal.people) : (cal.people||[]);
-    cal.events = typeof cal.events==="string" ? JSON.parse(cal.events) : (cal.events||[]);
-    return cal;
-  });
+return DB.from(“calendars”).select(”*”).eq(“id”,id).then(function(r){
+if(r.error) { console.error(“DB error:”, r.error); return null; }
+if(!r.data||r.data.length===0) return null;
+var cal = r.data[0];
+cal.people = typeof cal.people===“string” ? JSON.parse(cal.people) : (cal.people||[]);
+cal.events = typeof cal.events===“string” ? JSON.parse(cal.events) : (cal.events||[]);
+return cal;
+});
 }
 
 function dbSaveCalendar(id, people, events) {
-  return DB.from("calendars").update({
-    people:JSON.stringify(people), events:JSON.stringify(events)
-  }).eq("id",id);
+return DB.from(“calendars”).update({
+people:JSON.stringify(people), events:JSON.stringify(events)
+}).eq(“id”,id);
 }
 
 function dbFindByEmail(email) {
-  return DB.from("calendars").select("id,name,created_at").eq("email",email);
+return DB.from(“calendars”).select(“id,name,created_at”).eq(“email”,email);
 }
 
 // Pattern for event type
 function pat(type) {
-  if(type==="CE") {
-    // Diagonal stripes - dark semi-transparent
-    return "repeating-linear-gradient(45deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 2px, transparent 2px, transparent 8px)";
-  } else if(type==="Meet & Greet") {
-    // Dots - using radial gradient
-    return "radial-gradient(circle, rgba(0,0,0,0.2) 1.5px, transparent 1.5px)";
-  } else {
-    // Crosshatch grid
-    return "repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1.5px, transparent 1.5px, transparent 10px), repeating-linear-gradient(90deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1.5px, transparent 1.5px, transparent 10px)";
-  }
+if(type===“CE”) {
+// Diagonal stripes - dark semi-transparent
+return “repeating-linear-gradient(45deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 2px, transparent 2px, transparent 8px)”;
+} else if(type===“Meet & Greet”) {
+// Dots - using radial gradient
+return “radial-gradient(circle, rgba(0,0,0,0.2) 1.5px, transparent 1.5px)”;
+} else {
+// Crosshatch grid
+return “repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1.5px, transparent 1.5px, transparent 10px), repeating-linear-gradient(90deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1.5px, transparent 1.5px, transparent 10px)”;
+}
 }
 
 // Build gradient from multiple people colors
 function makeGradient(colors) {
-  if(!colors||colors.length===0) return "#eee";
-  if(colors.length===1) return colors[0];
-  var pct = Math.round(100/colors.length);
-  var stops = [];
-  for(var i=0;i<colors.length;i++) {
-    stops.push(colors[i]+" "+(i*pct)+"%");
-    stops.push(colors[i]+" "+((i+1)*pct)+"%");
-  }
-  return "linear-gradient(135deg,"+stops.join(",")+")";
+if(!colors||colors.length===0) return “#eee”;
+if(colors.length===1) return colors[0];
+var pct = Math.round(100/colors.length);
+var stops = [];
+for(var i=0;i<colors.length;i++) {
+stops.push(colors[i]+” “+(i*pct)+”%”);
+stops.push(colors[i]+” “+((i+1)*pct)+”%”);
+}
+return “linear-gradient(135deg,”+stops.join(”,”)+”)”;
 }
 
 var COLORS = [
-  {color:"#E05C5C",light:"#FDEAEA"},{color:"#E08A2E",light:"#FEF0DC"},
-  {color:"#D4BC1A",light:"#FBF8D8"},{color:"#4CAF6F",light:"#DFF5E8"},
-  {color:"#2EAACC",light:"#D8F3FA"},{color:"#3A7FD5",light:"#D8E9FA"},
-  {color:"#7B52D4",light:"#EDE6FA"},{color:"#C450A8",light:"#F8E0F3"},
-  {color:"#D45050",light:"#FAE0E0"},{color:"#3DA68C",light:"#D7F5EE"},
-  {color:"#6B7FCC",light:"#E3E7FA"},{color:"#C47A3A",light:"#FAF0E2"},
-  {color:"#A0522D",light:"#F5EAE0"},{color:"#2E86AB",light:"#D6EEF7"},
-  {color:"#8B5CF6",light:"#EDE9FE"},{color:"#059669",light:"#D1FAE5"}
+{color:”#E05C5C”,light:”#FDEAEA”},{color:”#E08A2E”,light:”#FEF0DC”},
+{color:”#D4BC1A”,light:”#FBF8D8”},{color:”#4CAF6F”,light:”#DFF5E8”},
+{color:”#2EAACC”,light:”#D8F3FA”},{color:”#3A7FD5”,light:”#D8E9FA”},
+{color:”#7B52D4”,light:”#EDE6FA”},{color:”#C450A8”,light:”#F8E0F3”},
+{color:”#D45050”,light:”#FAE0E0”},{color:”#3DA68C”,light:”#D7F5EE”},
+{color:”#6B7FCC”,light:”#E3E7FA”},{color:”#C47A3A”,light:”#FAF0E2”},
+{color:”#A0522D”,light:”#F5EAE0”},{color:”#2E86AB”,light:”#D6EEF7”},
+{color:”#8B5CF6”,light:”#EDE9FE”},{color:”#059669”,light:”#D1FAE5”}
 ];
 
-var EVENT_TYPES = ["CE","Meet & Greet","Hold"];
-var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-var DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+var EVENT_TYPES = [“CE”,“Meet & Greet”,“Hold”];
+var MONTHS = [“January”,“February”,“March”,“April”,“May”,“June”,“July”,“August”,“September”,“October”,“November”,“December”];
+var DAYS = [“Sun”,“Mon”,“Tue”,“Wed”,“Thu”,“Fri”,“Sat”];
 
 function getToday(){var d=new Date();return {year:d.getFullYear(),month:d.getMonth(),day:d.getDate()};}
 function daysInMonth(y,m){return new Date(y,m+1,0).getDate();}
 function firstDay(y,m){return new Date(y,m,1).getDay();}
-function dk(y,m,d){return y+"-"+("0"+(m+1)).slice(-2)+"-"+("0"+d).slice(-2);}
-function timeLabel(s,e){return s?(e?s+" - "+e:s):null;}
+function dk(y,m,d){return y+”-”+(“0”+(m+1)).slice(-2)+”-”+(“0”+d).slice(-2);}
+function timeLabel(s,e){return s?(e?s+” - “+e:s):null;}
 
 function exportICS(events, people) {
-  function gp(id){for(var i=0;i<people.length;i++){if(people[i].id===id)return people[i];}return {name:"?"};}
-  function fmt(ds){return ds.replace(/-/g,"")+"T090000Z";}
-  var lines=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Poly Tetris//EN","CALSCALE:GREGORIAN"];
-  for(var i=0;i<events.length;i++){
-    var ev=events[i];
-    var attendeeIds = ev.attendeeIds||[ev.personId];
-    var names = attendeeIds.map(function(id){return gp(id).name;}).join(", ");
-    lines.push("BEGIN:VEVENT","UID:"+ev.id+"@polytris","DTSTART:"+fmt(ev.date),"DTEND:"+fmt(ev.date),"SUMMARY:"+ev.type+" - "+names,"DESCRIPTION:"+(ev.note||""),"END:VEVENT");
-  }
-  lines.push("END:VCALENDAR");
-  var blob=new Blob([lines.join("\r\n")],{type:"text/calendar"});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement("a");a.href=url;a.download="polytris.ics";a.click();
-  URL.revokeObjectURL(url);
+function gp(id){for(var i=0;i<people.length;i++){if(people[i].id===id)return people[i];}return {name:”?”};}
+function fmt(ds){return ds.replace(/-/g,””)+“T090000Z”;}
+var lines=[“BEGIN:VCALENDAR”,“VERSION:2.0”,“PRODID:-//Poly Tetris//EN”,“CALSCALE:GREGORIAN”];
+for(var i=0;i<events.length;i++){
+var ev=events[i];
+var attendeeIds = ev.attendeeIds||[ev.personId];
+var names = attendeeIds.map(function(id){return gp(id).name;}).join(”, “);
+lines.push(“BEGIN:VEVENT”,“UID:”+ev.id+”@polytris”,“DTSTART:”+fmt(ev.date),“DTEND:”+fmt(ev.date),“SUMMARY:”+ev.type+” - “+names,“DESCRIPTION:”+(ev.note||””),“END:VEVENT”);
+}
+lines.push(“END:VCALENDAR”);
+var blob=new Blob([lines.join(”\r\n”)],{type:“text/calendar”});
+var url=URL.createObjectURL(blob);
+var a=document.createElement(“a”);a.href=url;a.download=“polytris.ics”;a.click();
+URL.revokeObjectURL(url);
 }
 
 // EventChip with gradient + pattern overlay
 function EventChip(props) {
-  var ev=props.ev, people=props.people, onClick=props.onClick, compact=props.compact;
-  var onDragStart=props.onDragStart, onDragEnd=props.onDragEnd;
+var ev=props.ev, people=props.people, onClick=props.onClick, compact=props.compact;
+var onDragStart=props.onDragStart, onDragEnd=props.onDragEnd;
 
-  function gp(id){for(var i=0;i<people.length;i++){if(people[i].id===id)return people[i];}return {name:"?",color:"#aaa",light:"#eee"};}
+function gp(id){for(var i=0;i<people.length;i++){if(people[i].id===id)return people[i];}return {name:”?”,color:”#aaa”,light:”#eee”};}
 
-  var attendeeIds = ev.attendeeIds || [ev.personId];
-  var attendees = attendeeIds.map(function(id){return gp(id);});
-  var colors = attendees.map(function(p){return p.color;});
-  var gradient = makeGradient(colors);
-  var time = timeLabel(ev.startTime, ev.endTime);
-  var names = attendees.map(function(p){return p.name;}).join(", ");
+var attendeeIds = ev.attendeeIds || [ev.personId];
+var attendees = attendeeIds.map(function(id){return gp(id);});
+var colors = attendees.map(function(p){return p.color;});
+var gradient = makeGradient(colors);
+var time = timeLabel(ev.startTime, ev.endTime);
+var names = attendees.map(function(p){return p.name;}).join(”, “);
 
-  var chipStyle = {
-    overflow:"hidden", borderRadius:compact?5:6,
-    padding:compact?"2px 6px":"5px 8px",
-    fontSize:compact?10:11, fontWeight:600,
-    fontFamily:"'DM Mono',monospace",
-    whiteSpace:compact?"nowrap":"normal",
-    cursor:"grab", position:"relative",
-    background:gradient,
-    border:"none",
-    boxShadow:"0 1px 3px rgba(0,0,0,.15)"
-  };
+var chipStyle = {
+overflow:“hidden”, borderRadius:compact?5:6,
+padding:compact?“2px 6px”:“5px 8px”,
+fontSize:compact?10:11, fontWeight:600,
+fontFamily:”‘DM Mono’,monospace”,
+whiteSpace:compact?“nowrap”:“normal”,
+cursor:“grab”, position:“relative”,
+background:gradient,
+border:“none”,
+boxShadow:“0 1px 3px rgba(0,0,0,.15)”
+};
 
-  // Pattern overlay div sits on top of gradient
-  var patternBg = pat(ev.type);
-  var overlayStyle = {
-    position:"absolute", inset:0, pointerEvents:"none",
-    backgroundImage:patternBg,
-    backgroundSize:ev.type==="Meet & Greet"?"6px 6px":(ev.type==="Hold"?"10px 10px":"8px 8px")
-  };
+// Pattern overlay div sits on top of gradient
+var patternBg = pat(ev.type);
+var overlayStyle = {
+position:“absolute”, inset:0, pointerEvents:“none”,
+backgroundImage:patternBg,
+backgroundSize:ev.type===“Meet & Greet”?“6px 6px”:(ev.type===“Hold”?“10px 10px”:“8px 8px”)
+};
 
-  var content;
-  if(compact) {
-    content = ev.type+" - "+names+(time?" "+time:"");
-  } else {
-    var kids=[
-      h("div",{key:"t",style:{fontWeight:700}},ev.type),
-      h("div",{key:"n",style:{fontWeight:400,opacity:.9,fontSize:10}},names)
-    ];
-    if(time) kids.push(h("div",{key:"tm",style:{fontWeight:400,fontSize:10,opacity:.8}},time));
-    if(ev.note) kids.push(h("div",{key:"nt",style:{fontWeight:400,fontSize:10,opacity:.75}},ev.note));
-    content=kids;
-  }
-
-  return h("div",{
-    className:"event-chip",
-    onClick:function(e){e.stopPropagation();onClick(e);},
-    draggable:true,
-    onDragStart:function(e){e.stopPropagation();onDragStart(e);},
-    onDragEnd:function(e){e.stopPropagation();onDragEnd(e);},
-    style:chipStyle
-  },
-    h("div",{style:overlayStyle}),
-    h("span",{style:{position:"relative",color:"#fff",textShadow:"0 1px 2px rgba(0,0,0,.4)"}},content)
-  );
+var content;
+if(compact) {
+content = ev.type+” - “+names+(time?” “+time:””);
+} else {
+var kids=[
+h(“div”,{key:“t”,style:{fontWeight:700}},ev.type),
+h(“div”,{key:“n”,style:{fontWeight:400,opacity:.9,fontSize:10}},names)
+];
+if(time) kids.push(h(“div”,{key:“tm”,style:{fontWeight:400,fontSize:10,opacity:.8}},time));
+if(ev.note) kids.push(h(“div”,{key:“nt”,style:{fontWeight:400,fontSize:10,opacity:.75}},ev.note));
+content=kids;
 }
 
-//  LANDING PAGE 
+return h(“div”,{
+className:“event-chip”,
+onClick:function(e){e.stopPropagation();onClick(e);},
+draggable:true,
+onDragStart:function(e){e.stopPropagation();onDragStart(e);},
+onDragEnd:function(e){e.stopPropagation();onDragEnd(e);},
+style:chipStyle
+},
+h(“div”,{style:overlayStyle}),
+h(“span”,{style:{position:“relative”,color:”#fff”,textShadow:“0 1px 2px rgba(0,0,0,.4)”}},content)
+);
+}
+
+//  LANDING PAGE
 function LandingPage(props) {
-  var onEnter=props.onEnter;
-  var cs=useState("home");var screen=cs[0],setScreen=cs[1];
-  var ns=useState("");var calName=ns[0],setCalName=ns[1];
-  var es=useState("");var email=es[0],setEmail=es[1];
-  var ps=useState("");var password=ps[0],setPassword=ps[1];
-  var ls=useState(false);var loading=ls[0],setLoading=ls[1];
-  var errs=useState("");var err=errs[0],setErr=errs[1];
-  var rEs=useState("");var rEmail=rEs[0],setREmail=rEs[1];
-  var rRs=useState(null);var rResults=rRs[0],setRResults=rRs[1];
+var onEnter=props.onEnter;
+var cs=useState(“home”);var screen=cs[0],setScreen=cs[1];
+var ns=useState(””);var calName=ns[0],setCalName=ns[1];
+var es=useState(””);var email=es[0],setEmail=es[1];
+var ps=useState(””);var password=ps[0],setPassword=ps[1];
+var ls=useState(false);var loading=ls[0],setLoading=ls[1];
+var errs=useState(””);var err=errs[0],setErr=errs[1];
+var rEs=useState(””);var rEmail=rEs[0],setREmail=rEs[1];
+var rRs=useState(null);var rResults=rRs[0],setRResults=rRs[1];
 
-  function createCalendar(){
-    if(!calName.trim()){setErr("Please enter a name.");return;}
-    setLoading(true);setErr("");
-    var id=genId();
-    dbCreateCalendar(id,calName.trim(),email.trim(),password.trim()).then(function(r){
-      if(r.error){setErr("Error creating. Please try again.");setLoading(false);return;}
-      window.location.hash=id;
-      onEnter(id,true);
-    }).catch(function(){setErr("Error creating.");setLoading(false);});
-  }
-
-  function recover(){
-    if(!rEmail.trim())return;
-    setLoading(true);
-    dbFindByEmail(rEmail.trim()).then(function(r){setRResults(r.data||[]);setLoading(false);}).catch(function(){setLoading(false);});
-  }
-
-  var inp={width:"100%",padding:"10px 14px",borderRadius:8,border:"1.5px solid #E0E0E0",fontSize:14,background:"#FAFAFA",marginBottom:12};
-  var btnP={width:"100%",padding:"12px",borderRadius:10,background:"#1A1A2E",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:13,color:"#E08A2E",fontWeight:700,letterSpacing:1,marginTop:4};
-
-  if(screen==="recover") return h("div",{style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:20}},
-    h("div",{style:{background:"#fff",borderRadius:16,padding:"32px",maxWidth:480,width:"100%",boxShadow:"0 4px 24px rgba(0,0,0,.1)"}},
-      h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#E08A2E",letterSpacing:3,marginBottom:8}},"RECOVER"),
-      h("h2",{style:{fontSize:20,fontWeight:700,color:"#1A1A2E",marginBottom:16}},"Find your calendars"),
-      h("input",{type:"email",placeholder:"your@email.com",value:rEmail,onChange:function(e){setREmail(e.target.value);},style:inp}),
-      rResults&&rResults.length===0&&h("p",{style:{fontSize:13,color:"#D45050",marginBottom:8}},"No calendars found."),
-      rResults&&rResults.length>0&&h("div",{style:{marginBottom:16}},rResults.map(function(cal){
-        return h("div",{key:cal.id,style:{background:"#F5F4F0",borderRadius:8,padding:"10px 14px",marginBottom:8,cursor:"pointer",border:"1.5px solid #E0E0E0"},onClick:function(){window.location.hash=cal.id;onEnter(cal.id,false);}},
-          h("div",{style:{fontWeight:600,color:"#1A1A2E",fontSize:14}},cal.name),
-          h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:10,color:"#aaa",marginTop:2}},cal.id)
-        );
-      })),
-      h("button",{onClick:recover,style:btnP},loading?"SEARCHING...":"FIND MY CALENDARS"),
-      h("button",{onClick:function(){setScreen("home");},style:{background:"none",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#aaa",marginTop:12,display:"block",width:"100%",textAlign:"center"}},"BACK")
-    )
-  );
-
-  return h("div",{style:{minHeight:"100vh",background:"linear-gradient(135deg,#1A1A2E 0%,#2D1B4E 100%)",display:"flex",alignItems:"center",justifyContent:"center",padding:20}},
-    h("div",{style:{maxWidth:520,width:"100%"}},
-      h("div",{style:{textAlign:"center",marginBottom:40}},
-        h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:12,color:"#E08A2E",letterSpacing:4,marginBottom:12}},"POLY TETRIS"),
-        h("h1",{style:{fontSize:36,fontWeight:700,color:"#fff",marginBottom:12,lineHeight:1.2}},"Schedule CE's & Meet and Greets"),
-        h("p",{style:{fontSize:15,color:"rgba(255,255,255,.6)",lineHeight:1.6}},"Create a shared calendar for your polycule. Color-coded, multi-attendee, and shareable.")
-      ),
-      h("div",{style:{background:"#fff",borderRadius:16,padding:"32px",boxShadow:"0 4px 24px rgba(0,0,0,.1)"}},
-        h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#E08A2E",letterSpacing:3,marginBottom:16}},"CREATE A CALENDAR"),
-        h("input",{type:"text",placeholder:"Calendar name (e.g. Our Polycule)",value:calName,onChange:function(e){setCalName(e.target.value);},style:inp}),
-        h("input",{type:"email",placeholder:"Your email (for recovery)",value:email,onChange:function(e){setEmail(e.target.value);},style:inp}),
-        h("input",{type:"password",placeholder:"Password to protect editing (optional)",value:password,onChange:function(e){setPassword(e.target.value);},style:inp}),
-        err&&h("p",{style:{fontSize:13,color:"#D45050",marginBottom:8}},err),
-        h("button",{onClick:createCalendar,style:btnP},loading?"CREATING...":"CREATE CALENDAR"),
-        h("div",{style:{borderTop:"1px solid #F0F0F0",marginTop:20,paddingTop:16,textAlign:"center"}},
-          h("button",{onClick:function(){setScreen("recover");},style:{background:"none",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#aaa",letterSpacing:1}},"RECOVER EXISTING CALENDAR")
-        )
-      )
-    )
-  );
+function createCalendar(){
+if(!calName.trim()){setErr(“Please enter a name.”);return;}
+setLoading(true);setErr(””);
+var id=genId();
+dbCreateCalendar(id,calName.trim(),email.trim(),password.trim()).then(function(r){
+if(r.error){setErr(“Error creating. Please try again.”);setLoading(false);return;}
+window.location.hash=id;
+onEnter(id,true);
+}).catch(function(){setErr(“Error creating.”);setLoading(false);});
 }
 
-//  PASSWORD GATE 
+function recover(){
+if(!rEmail.trim())return;
+setLoading(true);
+dbFindByEmail(rEmail.trim()).then(function(r){setRResults(r.data||[]);setLoading(false);}).catch(function(){setLoading(false);});
+}
+
+var inp={width:“100%”,padding:“10px 14px”,borderRadius:8,border:“1.5px solid #E0E0E0”,fontSize:14,background:”#FAFAFA”,marginBottom:12};
+var btnP={width:“100%”,padding:“12px”,borderRadius:10,background:”#1A1A2E”,border:“none”,cursor:“pointer”,fontFamily:”‘DM Mono’,monospace”,fontSize:13,color:”#E08A2E”,fontWeight:700,letterSpacing:1,marginTop:4};
+
+if(screen===“recover”) return h(“div”,{style:{minHeight:“100vh”,display:“flex”,alignItems:“center”,justifyContent:“center”,padding:20}},
+h(“div”,{style:{background:”#fff”,borderRadius:16,padding:“32px”,maxWidth:480,width:“100%”,boxShadow:“0 4px 24px rgba(0,0,0,.1)”}},
+h(“div”,{style:{fontFamily:”‘DM Mono’,monospace”,fontSize:11,color:”#E08A2E”,letterSpacing:3,marginBottom:8}},“RECOVER”),
+h(“h2”,{style:{fontSize:20,fontWeight:700,color:”#1A1A2E”,marginBottom:16}},“Find your calendars”),
+h(“input”,{type:“email”,placeholder:“your@email.com”,value:rEmail,onChange:function(e){setREmail(e.target.value);},style:inp}),
+rResults&&rResults.length===0&&h(“p”,{style:{fontSize:13,color:”#D45050”,marginBottom:8}},“No calendars found.”),
+rResults&&rResults.length>0&&h(“div”,{style:{marginBottom:16}},rResults.map(function(cal){
+return h(“div”,{key:cal.id,style:{background:”#F5F4F0”,borderRadius:8,padding:“10px 14px”,marginBottom:8,cursor:“pointer”,border:“1.5px solid #E0E0E0”},onClick:function(){window.location.hash=cal.id;onEnter(cal.id,false);}},
+h(“div”,{style:{fontWeight:600,color:”#1A1A2E”,fontSize:14}},cal.name),
+h(“div”,{style:{fontFamily:”‘DM Mono’,monospace”,fontSize:10,color:”#aaa”,marginTop:2}},cal.id)
+);
+})),
+h(“button”,{onClick:recover,style:btnP},loading?“SEARCHING…”:“FIND MY CALENDARS”),
+h(“button”,{onClick:function(){setScreen(“home”);},style:{background:“none”,border:“none”,cursor:“pointer”,fontFamily:”‘DM Mono’,monospace”,fontSize:11,color:”#aaa”,marginTop:12,display:“block”,width:“100%”,textAlign:“center”}},“BACK”)
+)
+);
+
+return h(“div”,{style:{minHeight:“100vh”,background:“linear-gradient(135deg,#1A1A2E 0%,#2D1B4E 100%)”,display:“flex”,alignItems:“center”,justifyContent:“center”,padding:20}},
+h(“div”,{style:{maxWidth:520,width:“100%”}},
+h(“div”,{style:{textAlign:“center”,marginBottom:40}},
+h(“div”,{style:{fontFamily:”‘DM Mono’,monospace”,fontSize:12,color:”#E08A2E”,letterSpacing:4,marginBottom:12}},“POLY TETRIS”),
+h(“h1”,{style:{fontSize:36,fontWeight:700,color:”#fff”,marginBottom:12,lineHeight:1.2}},“Schedule CE’s & Meet and Greets”),
+h(“p”,{style:{fontSize:15,color:“rgba(255,255,255,.6)”,lineHeight:1.6}},“Create a shared calendar for your polycule. Color-coded, multi-attendee, and shareable.”)
+),
+h(“div”,{style:{background:”#fff”,borderRadius:16,padding:“32px”,boxShadow:“0 4px 24px rgba(0,0,0,.1)”}},
+h(“div”,{style:{fontFamily:”‘DM Mono’,monospace”,fontSize:11,color:”#E08A2E”,letterSpacing:3,marginBottom:16}},“CREATE A CALENDAR”),
+h(“input”,{type:“text”,placeholder:“Calendar name (e.g. Our Polycule)”,value:calName,onChange:function(e){setCalName(e.target.value);},style:inp}),
+h(“input”,{type:“email”,placeholder:“Your email (for recovery)”,value:email,onChange:function(e){setEmail(e.target.value);},style:inp}),
+h(“input”,{type:“password”,placeholder:“Password to protect editing (optional)”,value:password,onChange:function(e){setPassword(e.target.value);},style:inp}),
+err&&h(“p”,{style:{fontSize:13,color:”#D45050”,marginBottom:8}},err),
+h(“button”,{onClick:createCalendar,style:btnP},loading?“CREATING…”:“CREATE CALENDAR”),
+h(“div”,{style:{borderTop:“1px solid #F0F0F0”,marginTop:20,paddingTop:16,textAlign:“center”}},
+h(“button”,{onClick:function(){setScreen(“recover”);},style:{background:“none”,border:“none”,cursor:“pointer”,fontFamily:”‘DM Mono’,monospace”,fontSize:11,color:”#aaa”,letterSpacing:1}},“RECOVER EXISTING CALENDAR”)
+)
+)
+)
+);
+}
+
+//  PASSWORD GATE
 function PasswordGate(props) {
-  var ps=useState("");var pw=ps[0],setPw=ps[1];
-  var es=useState("");var err=es[0],setErr=es[1];
-  function check(){if(pw===props.password)props.onUnlock();else setErr("Incorrect password.");}
-  return h("div",{style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:20,background:"#F5F4F0"}},
-    h("div",{style:{background:"#fff",borderRadius:16,padding:"32px",maxWidth:400,width:"100%",boxShadow:"0 4px 24px rgba(0,0,0,.1)"}},
-      h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#E08A2E",letterSpacing:3,marginBottom:8}},"PROTECTED"),
-      h("h2",{style:{fontSize:20,fontWeight:700,color:"#1A1A2E",marginBottom:4}},props.calName),
-      h("p",{style:{fontSize:13,color:"#888",marginBottom:20}},"Enter the password to edit, or view without one."),
-      h("input",{type:"password",placeholder:"Password",value:pw,onChange:function(e){setPw(e.target.value);},onKeyDown:function(e){if(e.key==="Enter")check();},style:{width:"100%",padding:"10px 14px",borderRadius:8,border:"1.5px solid #E0E0E0",fontSize:14,background:"#FAFAFA",marginBottom:12}}),
-      err&&h("p",{style:{fontSize:13,color:"#D45050",marginBottom:8}},err),
-      h("button",{onClick:check,style:{width:"100%",padding:"12px",borderRadius:10,background:"#1A1A2E",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:13,color:"#E08A2E",fontWeight:700,marginBottom:10}},"UNLOCK TO EDIT"),
-      h("button",{onClick:props.onViewOnly,style:{width:"100%",padding:"12px",borderRadius:10,background:"#F5F4F0",border:"1.5px solid #E0E0E0",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:13,color:"#888",fontWeight:600}},"VIEW ONLY")
-    )
-  );
+var ps=useState(””);var pw=ps[0],setPw=ps[1];
+var es=useState(””);var err=es[0],setErr=es[1];
+function check(){if(pw===props.password)props.onUnlock();else setErr(“Incorrect password.”);}
+return h(“div”,{style:{minHeight:“100vh”,display:“flex”,alignItems:“center”,justifyContent:“center”,padding:20,background:”#F5F4F0”}},
+h(“div”,{style:{background:”#fff”,borderRadius:16,padding:“32px”,maxWidth:400,width:“100%”,boxShadow:“0 4px 24px rgba(0,0,0,.1)”}},
+h(“div”,{style:{fontFamily:”‘DM Mono’,monospace”,fontSize:11,color:”#E08A2E”,letterSpacing:3,marginBottom:8}},“PROTECTED”),
+h(“h2”,{style:{fontSize:20,fontWeight:700,color:”#1A1A2E”,marginBottom:4}},props.calName),
+h(“p”,{style:{fontSize:13,color:”#888”,marginBottom:20}},“Enter the password to edit, or view without one.”),
+h(“input”,{type:“password”,placeholder:“Password”,value:pw,onChange:function(e){setPw(e.target.value);},onKeyDown:function(e){if(e.key===“Enter”)check();},style:{width:“100%”,padding:“10px 14px”,borderRadius:8,border:“1.5px solid #E0E0E0”,fontSize:14,background:”#FAFAFA”,marginBottom:12}}),
+err&&h(“p”,{style:{fontSize:13,color:”#D45050”,marginBottom:8}},err),
+h(“button”,{onClick:check,style:{width:“100%”,padding:“12px”,borderRadius:10,background:”#1A1A2E”,border:“none”,cursor:“pointer”,fontFamily:”‘DM Mono’,monospace”,fontSize:13,color:”#E08A2E”,fontWeight:700,marginBottom:10}},“UNLOCK TO EDIT”),
+h(“button”,{onClick:props.onViewOnly,style:{width:“100%”,padding:“12px”,borderRadius:10,background:”#F5F4F0”,border:“1.5px solid #E0E0E0”,cursor:“pointer”,fontFamily:”‘DM Mono’,monospace”,fontSize:13,color:”#888”,fontWeight:600}},“VIEW ONLY”)
+)
+);
 }
 
-//  CALENDAR APP 
+//  CALENDAR APP
 function CalendarApp(props) {
-  var calId=props.calId, canEdit=props.canEdit;
-  var today=getToday();
+var calId=props.calId, canEdit=props.canEdit;
+var today=getToday();
 
-  var vs=useState("month");var view=vs[0],setView=vs[1];
-  var cs=useState({year:today.year,month:today.month});var cur=cs[0],setCur=cs[1];
-  var wks=useState(function(){var d=new Date();d.setDate(d.getDate()-d.getDay());return d;});var wk=wks[0],setWk=wks[1];
-  var evs=useState([]);var events=evs[0],setEvents=evs[1];
-  var pps=useState([]);var people=pps[0],setPeople=pps[1];
-  var cns=useState("");var calName=cns[0],setCalName=cns[1];
-  var ms=useState(null);var modal=ms[0],setModal=ms[1]; // {date, mode:"add"|"edit"|"join", ev}
-  var fs=useState({type:"CE",attendeeIds:[],note:"",startTime:"",endTime:""});var form=fs[0],setForm=fs[1];
-  var nts=useState("");var noteInput=nts[0],setNoteInput=nts[1];
-  var ens=useState(null);var editingName=ens[0],setEditingName=ens[1];
-  var nis=useState("");var nameInput=nis[0],setNameInput=nis[1];
-  var ts=useState(false);var toast=ts[0],setToast=ts[1];
-  var ss=useState("idle");var sync=ss[0],setSync=ss[1];
-  var ls=useState(true);var loading=ls[0],setLoading=ls[1];
-  var dragId=useRef(null);
-  var timer=useRef(null);
+var vs=useState(“month”);var view=vs[0],setView=vs[1];
+var cs=useState({year:today.year,month:today.month});var cur=cs[0],setCur=cs[1];
+var wks=useState(function(){var d=new Date();d.setDate(d.getDate()-d.getDay());return d;});var wk=wks[0],setWk=wks[1];
+var evs=useState([]);var events=evs[0],setEvents=evs[1];
+var pps=useState([]);var people=pps[0],setPeople=pps[1];
+var cns=useState(””);var calName=cns[0],setCalName=cns[1];
+var ms=useState(null);var modal=ms[0],setModal=ms[1]; // {date, mode:“add”|“edit”|“join”, ev}
+var fs=useState({type:“CE”,attendeeIds:[],note:””,startTime:””,endTime:””});var form=fs[0],setForm=fs[1];
+var nts=useState(””);var noteInput=nts[0],setNoteInput=nts[1];
+var ens=useState(null);var editingName=ens[0],setEditingName=ens[1];
+var nis=useState(””);var nameInput=nis[0],setNameInput=nis[1];
+var ts=useState(false);var toast=ts[0],setToast=ts[1];
+var ss=useState(“idle”);var sync=ss[0],setSync=ss[1];
+var ls=useState(true);var loading=ls[0],setLoading=ls[1];
+var dragId=useRef(null);
+var timer=useRef(null);
 
-  useEffect(function(){
-    dbLoadCalendar(calId).then(function(cal){
-      if(cal){setEvents(cal.events||[]);setPeople(cal.people||[]);setCalName(cal.name||"");}
-      setLoading(false);
-    }).catch(function(){setLoading(false);});
-  },[]);
+useEffect(function(){
+dbLoadCalendar(calId).then(function(cal){
+if(cal){setEvents(cal.events||[]);setPeople(cal.people||[]);setCalName(cal.name||””);}
+setLoading(false);
+}).catch(function(){setLoading(false);});
+},[]);
 
-  useEffect(function(){
-    var iv=setInterval(function(){
-      dbLoadCalendar(calId).then(function(cal){
-        if(cal){setEvents(cal.events||[]);if(!editingName)setPeople(cal.people||[]);}
-      }).catch(function(){});
-    },15000);
-    return function(){clearInterval(iv);};
-  },[editingName]);
+useEffect(function(){
+var iv=setInterval(function(){
+dbLoadCalendar(calId).then(function(cal){
+if(cal){setEvents(cal.events||[]);if(!editingName)setPeople(cal.people||[]);}
+}).catch(function(){});
+},15000);
+return function(){clearInterval(iv);};
+},[editingName]);
 
-  function persist(ne,np){
-    setSync("saving");clearTimeout(timer.current);
-    timer.current=setTimeout(function(){
-      dbSaveCalendar(calId,np||people,ne).then(function(){setSync("saved");setTimeout(function(){setSync("idle");},2000);}).catch(function(){setSync("error");});
-    },600);
-  }
-  function updEv(ne){setEvents(ne);persist(ne,null);}
-  function gp(id){for(var i=0;i<people.length;i++){if(people[i].id===id)return people[i];}return {id:0,name:"?",color:"#aaa",light:"#eee"};}
+function persist(ne,np){
+setSync(“saving”);clearTimeout(timer.current);
+timer.current=setTimeout(function(){
+dbSaveCalendar(calId,np||people,ne).then(function(){setSync(“saved”);setTimeout(function(){setSync(“idle”);},2000);}).catch(function(){setSync(“error”);});
+},600);
+}
+function updEv(ne){setEvents(ne);persist(ne,null);}
+function gp(id){for(var i=0;i<people.length;i++){if(people[i].id===id)return people[i];}return {id:0,name:”?”,color:”#aaa”,light:”#eee”};}
 
-  function saveName(id){
-    var np=people.map(function(p){return p.id===id?{id:p.id,name:nameInput,color:p.color,light:p.light}:p;});
-    setPeople(np);setEditingName(null);setSync("saving");
-    dbSaveCalendar(calId,np,events).then(function(){setSync("saved");setTimeout(function(){setSync("idle");},2000);}).catch(function(){setSync("error");});
-  }
-
-  function addPerson(){
-    var nextId=1;
-    for(var i=0;i<people.length;i++){if(people[i].id>=nextId)nextId=people[i].id+1;}
-    var ci=(people.length)%COLORS.length;
-    var np=people.concat([{id:nextId,name:"Person "+nextId,color:COLORS[ci].color,light:COLORS[ci].light}]);
-    setPeople(np);setSync("saving");
-    dbSaveCalendar(calId,np,events).then(function(){setSync("saved");setTimeout(function(){setSync("idle");},2000);}).catch(function(){setSync("error");});
-    setTimeout(function(){setEditingName(nextId);setNameInput("Person "+nextId);},50);
-  }
-
-  function weekLabel(){
-    var end=new Date(wk);end.setDate(end.getDate()+6);
-    return MONTHS[wk.getMonth()]+" "+wk.getDate()+" - "+(wk.getMonth()!==end.getMonth()?MONTHS[end.getMonth()]+' ':'')+end.getDate()+", "+end.getFullYear();
-  }
-
-  function openAdd(date){
-    if(!canEdit)return;
-    setForm({type:"CE",attendeeIds:people.length>0?[people[0].id]:[],note:"",startTime:"",endTime:""});
-    setNoteInput("");
-    setModal({date:date,mode:"add"});
-  }
-
-  function openEdit(ev,e){
-    e.stopPropagation();
-    if(!canEdit)return;
-    setForm({type:ev.type,attendeeIds:(ev.attendeeIds||[ev.personId]).slice(),note:ev.note||"",startTime:ev.startTime||"",endTime:ev.endTime||""});
-    setNoteInput(ev.note||"");
-    setModal({date:ev.date,mode:"edit",ev:ev});
-  }
-
-  function openJoin(ev,e){
-    e.stopPropagation();
-    if(!canEdit)return;
-    setModal({date:ev.date,mode:"join",ev:ev});
-  }
-
-  function saveAdd(){
-    if(!modal)return;
-    var newEv={id:Date.now(),date:modal.date,type:form.type,attendeeIds:form.attendeeIds,personId:form.attendeeIds[0]||0,note:noteInput,startTime:form.startTime,endTime:form.endTime};
-    updEv(events.concat([newEv]));
-    setModal(null);
-  }
-
-  function saveEdit(){
-    if(!modal||!modal.ev)return;
-    updEv(events.map(function(e){
-      return e.id===modal.ev.id?{id:e.id,date:e.date,type:form.type,attendeeIds:form.attendeeIds,personId:form.attendeeIds[0]||e.personId,note:noteInput,startTime:form.startTime,endTime:form.endTime}:e;
-    }));
-    setModal(null);
-  }
-
-  function saveJoin(personId){
-    if(!modal||!modal.ev)return;
-    var ev=modal.ev;
-    var existing=(ev.attendeeIds||[ev.personId]).slice();
-    if(existing.indexOf(personId)===-1) existing.push(personId);
-    updEv(events.map(function(e){
-      return e.id===ev.id?{id:e.id,date:e.date,type:e.type,attendeeIds:existing,personId:e.personId,note:e.note,startTime:e.startTime,endTime:e.endTime}:e;
-    }));
-    setModal(null);
-  }
-
-  function deleteEvent(){
-    if(!modal||!modal.ev)return;
-    updEv(events.filter(function(e){return e.id!==modal.ev.id;}));
-    setModal(null);
-  }
-
-  // Drag and drop
-  var justDropped = useRef(false);
-  function onDragStart(evId){
-    return function(e){
-      dragId.current=evId;
-      e.dataTransfer.effectAllowed="move";
-      e.dataTransfer.setData("text/plain", evId+"");
-    };
-  }
-  function onDragEnd(){dragId.current=null;}
-  function onDragOver(e){e.preventDefault();e.stopPropagation();e.dataTransfer.dropEffect="move";}
-  function onDrop(date){
-    return function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      if(!dragId.current||!canEdit)return;
-      var id=dragId.current;
-      justDropped.current=true;
-      setTimeout(function(){justDropped.current=false;},100);
-      updEv(events.map(function(ev){return ev.id===id?{id:ev.id,date:date,type:ev.type,attendeeIds:ev.attendeeIds,personId:ev.personId,note:ev.note,startTime:ev.startTime,endTime:ev.endTime}:ev;}));
-      dragId.current=null;
-    };
-  }
-
-  function toggleAttendee(id){
-    var arr=form.attendeeIds.slice();
-    var idx=arr.indexOf(id);
-    if(idx===-1){arr.push(id);}
-    else if(arr.length>1){arr.splice(idx,1);}
-    setForm({type:form.type,attendeeIds:arr,note:form.note,startTime:form.startTime,endTime:form.endTime});
-  }
-
-  var syncColor={idle:"#aaa",saving:"#E08A2E",saved:"#4CAF6F",error:"#D45050"}[sync];
-  var syncLabel={idle:"synced",saving:"saving...",saved:"saved",error:"error"}[sync];
-  var ov={position:"fixed",inset:0,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:100};
-  var mb={background:"#fff",borderRadius:16,padding:"24px",minWidth:300,maxWidth:"92vw",maxHeight:"90vh",overflowY:"auto",boxShadow:"0 8px 40px rgba(0,0,0,.2)"};
-
-  function renderFormFields(){
-    var typeBtns=EVENT_TYPES.map(function(t){
-      return h("button",{key:t,onClick:function(){setForm({type:t,attendeeIds:form.attendeeIds,note:form.note,startTime:form.startTime,endTime:form.endTime});},style:{flex:1,padding:"7px 0",borderRadius:8,cursor:"pointer",fontWeight:600,fontFamily:"'DM Mono',monospace",fontSize:10,background:form.type===t?"#1A1A2E":"#F5F4F0",color:form.type===t?"#E08A2E":"#777",border:form.type===t?"2px solid #1A1A2E":"2px solid transparent"}},t);
-    });
-
-    var attendeePicker=people.map(function(p){
-      var selected=form.attendeeIds.indexOf(p.id)!==-1;
-      return h("div",{key:p.id,onClick:function(){toggleAttendee(p.id);},style:{display:"flex",alignItems:"center",gap:6,padding:"6px 10px",borderRadius:20,cursor:"pointer",background:selected?p.light:"#F5F4F0",border:selected?"2px solid "+p.color:"2px solid transparent",marginBottom:4}},
-        h("div",{style:{width:10,height:10,borderRadius:"50%",background:p.color,flexShrink:0}}),
-        h("span",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:600,color:selected?p.color:"#888"}},p.name||("-")),
-        selected&&h("span",{style:{marginLeft:"auto",color:p.color,fontSize:12}},"v")
-      );
-    });
-
-    return h("div",null,
-      h("div",{style:{marginBottom:12}},
-        h("label",{style:{fontFamily:"'DM Mono',monospace",fontSize:10,color:"#888",letterSpacing:1,display:"block",marginBottom:6}},"EVENT TYPE"),
-        h("div",{style:{display:"flex",gap:4}},typeBtns)
-      ),
-      h("div",{style:{marginBottom:12}},
-        h("label",{style:{fontFamily:"'DM Mono',monospace",fontSize:10,color:"#888",letterSpacing:1,display:"block",marginBottom:6}},"ATTENDEES (select all who are going)"),
-        h("div",{style:{maxHeight:180,overflowY:"auto"}},attendeePicker)
-      ),
-      h("div",{style:{marginBottom:12}},
-        h("label",{style:{fontFamily:"'DM Mono',monospace",fontSize:10,color:"#888",letterSpacing:1,display:"block",marginBottom:6}},"NOTE (optional)"),
-        h("input",{value:noteInput,onChange:function(e){setNoteInput(e.target.value);},placeholder:"e.g. Location, topic...",style:{width:"100%",padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontSize:13,background:"#FAFAFA"}})
-      ),
-      h("div",{style:{marginBottom:4}},
-        h("label",{style:{fontFamily:"'DM Mono',monospace",fontSize:10,color:"#888",letterSpacing:1,display:"block",marginBottom:6}},"TIME 24hr (optional)"),
-        h("div",{style:{display:"flex",gap:8,alignItems:"center"}},
-          h("input",{type:"time",value:form.startTime,onChange:function(e){var v=e.target.value;setForm({type:form.type,attendeeIds:form.attendeeIds,note:form.note,startTime:v,endTime:form.endTime});},style:{flex:1,padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Mono',monospace",fontSize:12,background:"#FAFAFA"}}),
-          h("span",{style:{color:"#aaa"}},"-"),
-          h("input",{type:"time",value:form.endTime,onChange:function(e){var v=e.target.value;setForm({type:form.type,attendeeIds:form.attendeeIds,note:form.note,startTime:form.startTime,endTime:v});},style:{flex:1,padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Mono',monospace",fontSize:12,background:"#FAFAFA"}})
-        )
-      )
-    );
-  }
-
-  function MonthGrid(){
-    var cells=[];
-    for(var i=0;i<firstDay(cur.year,cur.month);i++)cells.push(null);
-    for(var d=1;d<=daysInMonth(cur.year,cur.month);d++)cells.push(d);
-    while(cells.length%7!==0)cells.push(null);
-    var hdrs=DAYS.map(function(d){return h("div",{key:d,style:{textAlign:"center",fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:600,color:"#888",padding:"6px 0",letterSpacing:1}},d);});
-    var grid=cells.map(function(day,i){
-      if(!day) return h("div",{key:"e"+i,style:{minHeight:80,background:"#FAFAFA",borderRadius:8}});
-      var key=dk(cur.year,cur.month,day);
-      var dayEvs=events.filter(function(e){return e.date===key;});
-      var isToday=cur.year===today.year&&cur.month===today.month&&day===today.day;
-      var chips=dayEvs.slice(0,3).map(function(ev){
-        return h(EventChip,{key:ev.id,ev:ev,people:people,compact:true,
-          onClick:function(e){openEdit(ev,e);},
-          onDragStart:onDragStart(ev.id),onDragEnd:onDragEnd});
-      });
-      if(dayEvs.length>3)chips.push(h("div",{key:"more",style:{fontSize:10,color:"#aaa",fontFamily:"'DM Mono',monospace"}},"+"+( dayEvs.length-3)+" more"));
-      return h("div",{key:key,
-        className:"day-cell",
-        onClick:function(){if(justDropped.current)return;openAdd(key);},
-        onDragOver:onDragOver,
-        onDrop:onDrop(key),
-        style:{minHeight:80,background:isToday?"#FFF8EC":"#fff",border:isToday?"2px solid #E08A2E":"1px solid #ECECEC",borderRadius:8,padding:4,cursor:canEdit?"pointer":"default",boxShadow:"0 1px 3px rgba(0,0,0,.05)"}},
-        h("div",{style:{fontSize:12,fontWeight:isToday?700:500,color:isToday?"#E08A2E":"#444",fontFamily:"'DM Mono',monospace",marginBottom:3}},day),
-        h("div",{style:{display:"flex",flexDirection:"column",gap:2}},chips)
-      );
-    });
-    return h("div",null,
-      h("div",{style:{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:2}},hdrs),
-      h("div",{style:{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:2}},grid)
-    );
-  }
-
-  function WeekGrid(){
-    var days=[];
-    for(var i=0;i<7;i++){var d=new Date(wk);d.setDate(d.getDate()+i);days.push(d);}
-    var hdrs=days.map(function(d,i){
-      var isToday=d.getFullYear()===today.year&&d.getMonth()===today.month&&d.getDate()===today.day;
-      return h("div",{key:i,style:{textAlign:"center",fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:600,color:isToday?"#E08A2E":"#888",padding:"6px 0"}},DAYS[d.getDay()]+" "+d.getDate());
-    });
-    var cols=days.map(function(d,i){
-      var key=dk(d.getFullYear(),d.getMonth(),d.getDate());
-      var dayEvs=events.filter(function(e){return e.date===key;});
-      var isToday=d.getFullYear()===today.year&&d.getMonth()===today.month&&d.getDate()===today.day;
-      var chips=dayEvs.map(function(ev){
-        return h(EventChip,{key:ev.id,ev:ev,people:people,compact:false,
-          onClick:function(e){openEdit(ev,e);},
-          onDragStart:onDragStart(ev.id),onDragEnd:onDragEnd});
-      });
-      if(dayEvs.length===0)chips.push(h("div",{key:"empty",style:{fontSize:10,color:"#ddd",fontFamily:"'DM Mono',monospace",marginTop:8,textAlign:"center"}},canEdit?"+ add":""));
-      return h("div",{key:"c"+i,
-        className:"day-cell",
-        onClick:function(){if(justDropped.current)return;openAdd(key);},
-        onDragOver:onDragOver,
-        onDrop:onDrop(key),
-        style:{minHeight:200,background:isToday?"#FFF8EC":"#fff",border:isToday?"2px solid #E08A2E":"1px solid #ECECEC",borderRadius:8,padding:6,cursor:canEdit?"pointer":"default",boxShadow:"0 1px 3px rgba(0,0,0,.05)"}},
-        h("div",{style:{display:"flex",flexDirection:"column",gap:3}},chips)
-      );
-    });
-    return h("div",null,
-      h("div",{style:{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:2}},hdrs),
-      h("div",{style:{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:2}},cols)
-    );
-  }
-
-  if(loading) return h("div",{style:{minHeight:"100vh",background:"#F5F4F0",display:"flex",alignItems:"center",justifyContent:"center"}},
-    h("div",{style:{fontFamily:"'DM Mono',monospace",color:"#aaa",fontSize:13,letterSpacing:2}},"LOADING CALENDAR...")
-  );
-
-  // Pattern legend
-  var legend=EVENT_TYPES.map(function(t){
-    var patternBg=pat(t);
-    var bgSize=t==="Meet & Greet"?"6px 6px":(t==="Hold"?"10px 10px":"8px 8px");
-    return h("div",{key:t,style:{display:"flex",alignItems:"center",gap:7}},
-      h("div",{style:{width:36,height:16,borderRadius:4,background:"#3A7FD5",backgroundImage:patternBg,backgroundSize:bgSize,boxShadow:"0 1px 3px rgba(0,0,0,.15)"}}),
-      h("span",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#666",fontWeight:600}},t)
-    );
-  });
-
-  // Team chips
-  var teamChips=people.map(function(p){
-    return h("div",{key:p.id,onClick:function(){if(!canEdit)return;setEditingName(p.id);setNameInput(p.name||"");},style:{display:"flex",alignItems:"center",gap:5,background:p.light,border:"2px solid "+p.color,borderRadius:20,padding:"4px 10px",cursor:canEdit?"pointer":"default"}},
-      h("div",{style:{width:9,height:9,borderRadius:"50%",background:p.color}}),
-      editingName===p.id
-        ?h("input",{autoFocus:true,value:nameInput,onChange:function(e){setNameInput(e.target.value);},onBlur:function(){saveName(p.id);},onKeyDown:function(e){if(e.key==="Enter")saveName(p.id);},style:{border:"none",background:"transparent",color:p.color,fontWeight:700,fontFamily:"'DM Mono',monospace",fontSize:11,width:70,outline:"none"}})
-        :h("span",{style:{color:p.color,fontWeight:700,fontFamily:"'DM Mono',monospace",fontSize:11}},p.name||"-")
-    );
-  });
-
-  return h("div",{style:{minHeight:"100vh",background:"#F5F4F0",paddingBottom:60}},
-    // Header
-    h("div",{style:{background:"#1A1A2E",padding:"18px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}},
-      h("div",null,
-        h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:10,color:"#E08A2E",letterSpacing:3,marginBottom:2}},"POLY TETRIS"),
-        h("div",{style:{fontSize:18,fontWeight:700,color:"#fff"}},(calName||"Calendar")+(canEdit?"":" (view only)"))
-      ),
-      h("div",{style:{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}},
-        h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:10,color:syncColor,padding:"4px 10px",background:"rgba(255,255,255,.06)",borderRadius:20}},syncLabel),
-        h("button",{onClick:function(){navigator.clipboard.writeText(window.location.href).then(function(){setToast(true);setTimeout(function(){setToast(false);},2500);});},style:{background:"rgba(255,255,255,.1)",border:"1px solid rgba(255,255,255,.2)",borderRadius:8,padding:"6px 12px",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#fff",fontWeight:600}},"Share"),
-        h("button",{onClick:function(){exportICS(events,people);},style:{background:"rgba(224,138,46,.15)",border:"1px solid rgba(224,138,46,.4)",borderRadius:8,padding:"6px 12px",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#E08A2E",fontWeight:600}},"Export .ics"),
-        h("button",{onClick:function(){window.location.hash="";window.location.reload();},style:{background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:8,padding:"6px 12px",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#aaa",fontWeight:600}},"Home"),
-        h("div",{style:{display:"flex",gap:4,background:"rgba(255,255,255,.08)",borderRadius:10,padding:4}},
-          ["month","week"].map(function(v){return h("button",{key:v,onClick:function(){setView(v);},style:{background:view===v?"#E08A2E":"transparent",color:view===v?"#fff":"#aaa",border:"none",borderRadius:7,padding:"5px 12px",fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:600,cursor:"pointer",textTransform:"uppercase"}},v);})
-        )
-      )
-    ),
-
-    h("div",{style:{maxWidth:1100,margin:"0 auto",padding:"20px 12px"}},
-      // Team legend
-      h("div",{style:{background:"#fff",borderRadius:12,padding:"14px 18px",marginBottom:16,boxShadow:"0 2px 8px rgba(0,0,0,.06)"}},
-        h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:10,color:"#aaa",letterSpacing:2,marginBottom:8}},canEdit?"TEAM - click to rename":"TEAM"),
-        h("div",{style:{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}},
-          teamChips,
-          canEdit?h("div",{onClick:addPerson,style:{display:"flex",alignItems:"center",gap:5,background:"#F5F4F0",border:"2px dashed #ccc",borderRadius:20,padding:"4px 12px",cursor:"pointer"}},
-            h("span",{style:{color:"#aaa",fontWeight:700,fontFamily:"'DM Mono',monospace",fontSize:11}},"+ Add Person")
-          ):null
-        ),
-        h("div",{style:{borderTop:"1px solid #F0F0F0",paddingTop:8,display:"flex",gap:14,flexWrap:"wrap"}},legend)
-      ),
-
-      // Nav
-      h("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}},
-        h("button",{onClick:function(){
-          if(view==="month"){setCur(function(c){return c.month===0?{year:c.year-1,month:11}:{year:c.year,month:c.month-1};});}
-          else{setWk(function(d){var n=new Date(d);n.setDate(n.getDate()-7);return n;});}
-        },style:{background:"#fff",border:"1px solid #E0E0E0",borderRadius:8,padding:"6px 14px",cursor:"pointer",fontSize:16,fontWeight:600,color:"#555"}},"<"),
-        h("div",{style:{fontFamily:"'DM Mono',monospace",fontWeight:600,fontSize:14,color:"#1A1A2E"}},view==="month"?(MONTHS[cur.month]+" "+cur.year):weekLabel()),
-        h("button",{onClick:function(){
-          if(view==="month"){setCur(function(c){return c.month===11?{year:c.year+1,month:0}:{year:c.year,month:c.month+1};});}
-          else{setWk(function(d){var n=new Date(d);n.setDate(n.getDate()+7);return n;});}
-        },style:{background:"#fff",border:"1px solid #E0E0E0",borderRadius:8,padding:"6px 14px",cursor:"pointer",fontSize:16,fontWeight:600,color:"#555"}},">")
-      ),
-
-      h("div",{style:{background:"#fff",borderRadius:14,padding:10,boxShadow:"0 2px 12px rgba(0,0,0,.07)"}},
-        view==="month"?h(MonthGrid,null):h(WeekGrid,null)
-      )
-    ),
-
-    // Toast
-    toast?h("div",{style:{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",background:"#1A1A2E",color:"#4CAF6F",fontFamily:"'DM Mono',monospace",fontSize:12,fontWeight:600,padding:"10px 22px",borderRadius:30,zIndex:200}},"Link copied!"):null,
-
-    // ADD Modal
-    canEdit&&modal&&modal.mode==="add"?h("div",{style:ov,onClick:function(){setModal(null);}},
-      h("div",{onClick:function(e){e.stopPropagation();},style:mb},
-        h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#E08A2E",letterSpacing:2,marginBottom:4}},"NEW EVENT"),
-        h("div",{style:{fontSize:15,fontWeight:700,color:"#1A1A2E",marginBottom:16}},modal.date),
-        renderFormFields(),
-        h("div",{style:{display:"flex",gap:8,marginTop:16}},
-          h("button",{onClick:function(){setModal(null);},style:{flex:1,padding:"9px 0",borderRadius:9,background:"#F5F4F0",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:12,color:"#888",fontWeight:600}},"Cancel"),
-          h("button",{onClick:saveAdd,style:{flex:2,padding:"9px 0",borderRadius:9,background:"#1A1A2E",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:12,color:"#E08A2E",fontWeight:700}},"ADD EVENT")
-        )
-      )
-    ):null,
-
-    // EDIT Modal
-    canEdit&&modal&&modal.mode==="edit"?h("div",{style:ov,onClick:function(){setModal(null);}},
-      h("div",{onClick:function(e){e.stopPropagation();},style:mb},
-        h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#3A7FD5",letterSpacing:2,marginBottom:4}},"EDIT EVENT"),
-        h("div",{style:{fontSize:15,fontWeight:700,color:"#1A1A2E",marginBottom:8}},modal.date),
-        // Join button
-        h("button",{onClick:function(){setModal({date:modal.date,mode:"join",ev:modal.ev});},style:{width:"100%",padding:"8px",borderRadius:8,background:"#F0F7FF",border:"1.5px solid #3A7FD5",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#3A7FD5",fontWeight:600,marginBottom:16}},"+ Join this event as someone else"),
-        renderFormFields(),
-        h("div",{style:{display:"flex",gap:8,marginTop:16}},
-          h("button",{onClick:deleteEvent,style:{flex:1,padding:"9px 0",borderRadius:9,background:"#FEE8E8",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#D45050",fontWeight:700}},"DELETE"),
-          h("button",{onClick:function(){setModal(null);},style:{flex:1,padding:"9px 0",borderRadius:9,background:"#F5F4F0",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#888",fontWeight:600}},"Cancel"),
-          h("button",{onClick:saveEdit,style:{flex:2,padding:"9px 0",borderRadius:9,background:"#1A1A2E",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#E08A2E",fontWeight:700}},"SAVE")
-        )
-      )
-    ):null,
-
-    // JOIN Modal
-    canEdit&&modal&&modal.mode==="join"?h("div",{style:ov,onClick:function(){setModal(null);}},
-      h("div",{onClick:function(e){e.stopPropagation();},style:mb},
-        h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#4CAF6F",letterSpacing:2,marginBottom:4}},"JOIN EVENT"),
-        h("div",{style:{fontSize:15,fontWeight:700,color:"#1A1A2E",marginBottom:4}},modal.ev&&modal.ev.type),
-        h("div",{style:{fontSize:13,color:"#888",marginBottom:16}},modal.date),
-        h("p",{style:{fontSize:13,color:"#555",marginBottom:12}},"Who is joining this event?"),
-        h("div",null,people.map(function(p){
-          var existing=modal.ev?(modal.ev.attendeeIds||[modal.ev.personId]):[];
-          var already=existing.indexOf(p.id)!==-1;
-          return h("div",{key:p.id,onClick:function(){if(!already)saveJoin(p.id);},style:{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:10,marginBottom:6,background:already?"#F5F4F0":"#fff",border:already?"1.5px solid #ddd":"1.5px solid "+p.color,cursor:already?"default":"pointer",opacity:already?.6:1}},
-            h("div",{style:{width:12,height:12,borderRadius:"50%",background:p.color}}),
-            h("span",{style:{fontFamily:"'DM Mono',monospace",fontSize:12,fontWeight:600,color:already?"#aaa":p.color}},p.name||(p.id+"")),
-            already&&h("span",{style:{marginLeft:"auto",fontFamily:"'DM Mono',monospace",fontSize:10,color:"#aaa"}},"already attending")
-          );
-        })),
-        h("button",{onClick:function(){setModal(null);},style:{width:"100%",padding:"9px",borderRadius:9,background:"#F5F4F0",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:12,color:"#888",fontWeight:600,marginTop:12}},"Cancel")
-      )
-    ):null
-  );
+function saveName(id){
+var np=people.map(function(p){return p.id===id?{id:p.id,name:nameInput,color:p.color,light:p.light}:p;});
+setPeople(np);setEditingName(null);setSync(“saving”);
+dbSaveCalendar(calId,np,events).then(function(){setSync(“saved”);setTimeout(function(){setSync(“idle”);},2000);}).catch(function(){setSync(“error”);});
 }
 
-//  ROOT 
-function Root() {
-  var hs=useState(window.location.hash.replace("#",""));var calId=hs[0],setCalId=hs[1];
-  var cs=useState(null);var cal=cs[0],setCal=cs[1];
-  var us=useState(false);var unlocked=us[0],setUnlocked=us[1];
-  var crs=useState(false);var creator=crs[0],setCreator=crs[1];
-  var vos=useState(false);var viewOnly=vos[0],setViewOnly=vos[1];
-  var ls=useState(false);var loading=ls[0],setLoading=ls[1];
+function addPerson(){
+var nextId=1;
+for(var i=0;i<people.length;i++){if(people[i].id>=nextId)nextId=people[i].id+1;}
+var ci=(people.length)%COLORS.length;
+var np=people.concat([{id:nextId,name:“Person “+nextId,color:COLORS[ci].color,light:COLORS[ci].light}]);
+setPeople(np);setSync(“saving”);
+dbSaveCalendar(calId,np,events).then(function(){setSync(“saved”);setTimeout(function(){setSync(“idle”);},2000);}).catch(function(){setSync(“error”);});
+setTimeout(function(){setEditingName(nextId);setNameInput(“Person “+nextId);},50);
+}
 
-  useEffect(function(){
-    if(!calId)return;
-    setLoading(true);
-    dbLoadCalendar(calId).then(function(data){setCal(data);setLoading(false);}).catch(function(){setLoading(false);});
-  },[calId]);
+function weekLabel(){
+var end=new Date(wk);end.setDate(end.getDate()+6);
+return MONTHS[wk.getMonth()]+” “+wk.getDate()+” - “+(wk.getMonth()!==end.getMonth()?MONTHS[end.getMonth()]+’ ‘:’’)+end.getDate()+”, “+end.getFullYear();
+}
 
-  function enterCalendar(id, asCreator){
-    setCalId(id);setCreator(asCreator);
-    if(asCreator)setUnlocked(true);
-  }
+function openAdd(date){
+if(!canEdit)return;
+setForm({type:“CE”,attendeeIds:people.length>0?[people[0].id]:[],note:””,startTime:””,endTime:””});
+setNoteInput(””);
+setModal({date:date,mode:“add”});
+}
 
-  if(!calId) return h(LandingPage,{onEnter:enterCalendar});
+function openEdit(ev,e){
+e.stopPropagation();
+if(!canEdit)return;
+setForm({type:ev.type,attendeeIds:(ev.attendeeIds||[ev.personId]).slice(),note:ev.note||””,startTime:ev.startTime||””,endTime:ev.endTime||””});
+setNoteInput(ev.note||””);
+setModal({date:ev.date,mode:“edit”,ev:ev});
+}
 
-  if(loading) return h("div",{style:{minHeight:"100vh",background:"#F5F4F0",display:"flex",alignItems:"center",justifyContent:"center"}},
-    h("div",{style:{fontFamily:"'DM Mono',monospace",color:"#aaa",fontSize:13,letterSpacing:2}},"LOADING...")
+function openJoin(ev,e){
+e.stopPropagation();
+if(!canEdit)return;
+setModal({date:ev.date,mode:“join”,ev:ev});
+}
+
+function saveAdd(){
+if(!modal)return;
+var newEv={id:Date.now(),date:modal.date,type:form.type,attendeeIds:form.attendeeIds,personId:form.attendeeIds[0]||0,note:noteInput,startTime:form.startTime,endTime:form.endTime};
+updEv(events.concat([newEv]));
+setModal(null);
+}
+
+function saveEdit(){
+if(!modal||!modal.ev)return;
+updEv(events.map(function(e){
+return e.id===modal.ev.id?{id:e.id,date:e.date,type:form.type,attendeeIds:form.attendeeIds,personId:form.attendeeIds[0]||e.personId,note:noteInput,startTime:form.startTime,endTime:form.endTime}:e;
+}));
+setModal(null);
+}
+
+function saveJoin(personId){
+if(!modal||!modal.ev)return;
+var ev=modal.ev;
+var existing=(ev.attendeeIds||[ev.personId]).slice();
+if(existing.indexOf(personId)===-1) existing.push(personId);
+updEv(events.map(function(e){
+return e.id===ev.id?{id:e.id,date:e.date,type:e.type,attendeeIds:existing,personId:e.personId,note:e.note,startTime:e.startTime,endTime:e.endTime}:e;
+}));
+setModal(null);
+}
+
+function deleteEvent(){
+if(!modal||!modal.ev)return;
+updEv(events.filter(function(e){return e.id!==modal.ev.id;}));
+setModal(null);
+}
+
+// Drag and drop
+var justDropped = useRef(false);
+function onDragStart(evId){
+return function(e){
+dragId.current=evId;
+e.dataTransfer.effectAllowed=“move”;
+e.dataTransfer.setData(“text/plain”, evId+””);
+};
+}
+function onDragEnd(){dragId.current=null;}
+function onDragOver(e){e.preventDefault();e.stopPropagation();e.dataTransfer.dropEffect=“move”;}
+function onDrop(date){
+return function(e){
+e.preventDefault();
+e.stopPropagation();
+if(!dragId.current||!canEdit)return;
+var id=dragId.current;
+justDropped.current=true;
+setTimeout(function(){justDropped.current=false;},100);
+updEv(events.map(function(ev){return ev.id===id?{id:ev.id,date:date,type:ev.type,attendeeIds:ev.attendeeIds,personId:ev.personId,note:ev.note,startTime:ev.startTime,endTime:ev.endTime}:ev;}));
+dragId.current=null;
+};
+}
+
+function toggleAttendee(id){
+var arr=form.attendeeIds.slice();
+var idx=arr.indexOf(id);
+if(idx===-1){arr.push(id);}
+else if(arr.length>1){arr.splice(idx,1);}
+setForm({type:form.type,attendeeIds:arr,note:form.note,startTime:form.startTime,endTime:form.endTime});
+}
+
+var syncColor={idle:”#aaa”,saving:”#E08A2E”,saved:”#4CAF6F”,error:”#D45050”}[sync];
+var syncLabel={idle:“synced”,saving:“saving…”,saved:“saved”,error:“error”}[sync];
+var ov={position:“fixed”,inset:0,background:“rgba(0,0,0,.5)”,display:“flex”,alignItems:“center”,justifyContent:“center”,zIndex:100};
+var mb={background:”#fff”,borderRadius:16,padding:“24px”,minWidth:300,maxWidth:“92vw”,maxHeight:“90vh”,overflowY:“auto”,boxShadow:“0 8px 40px rgba(0,0,0,.2)”};
+
+function renderFormFields(){
+var typeBtns=EVENT_TYPES.map(function(t){
+return h(“button”,{key:t,onClick:function(){setForm({type:t,attendeeIds:form.attendeeIds,note:form.note,startTime:form.startTime,endTime:form.endTime});},style:{flex:1,padding:“7px 0”,borderRadius:8,cursor:“pointer”,fontWeight:600,fontFamily:”‘DM Mono’,monospace”,fontSize:10,background:form.type===t?”#1A1A2E”:”#F5F4F0”,color:form.type===t?”#E08A2E”:”#777”,border:form.type===t?“2px solid #1A1A2E”:“2px solid transparent”}},t);
+});
+
+```
+var attendeePicker=people.map(function(p){
+  var selected=form.attendeeIds.indexOf(p.id)!==-1;
+  return h("div",{key:p.id,onClick:function(){toggleAttendee(p.id);},style:{display:"flex",alignItems:"center",gap:6,padding:"6px 10px",borderRadius:20,cursor:"pointer",background:selected?p.light:"#F5F4F0",border:selected?"2px solid "+p.color:"2px solid transparent",marginBottom:4}},
+    h("div",{style:{width:10,height:10,borderRadius:"50%",background:p.color,flexShrink:0}}),
+    h("span",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,fontWeight:600,color:selected?p.color:"#888"}},p.name||("-")),
+    selected&&h("span",{style:{marginLeft:"auto",color:p.color,fontSize:12}},"v")
   );
+});
 
-  if(!cal) return h("div",{style:{minHeight:"100vh",background:"#F5F4F0",display:"flex",alignItems:"center",justifyContent:"center"}},
-    h("div",{style:{textAlign:"center"}},
-      h("div",{style:{fontFamily:"'DM Mono',monospace",color:"#D45050",fontSize:13,marginBottom:16}},"Calendar not found."),
-      h("button",{onClick:function(){window.location.hash="";setCalId("");},style:{background:"#1A1A2E",color:"#E08A2E",border:"none",borderRadius:8,padding:"10px 20px",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:12,fontWeight:700}},"Go Home")
+return h("div",null,
+  h("div",{style:{marginBottom:12}},
+    h("label",{style:{fontFamily:"'DM Mono',monospace",fontSize:10,color:"#888",letterSpacing:1,display:"block",marginBottom:6}},"EVENT TYPE"),
+    h("div",{style:{display:"flex",gap:4}},typeBtns)
+  ),
+  h("div",{style:{marginBottom:12}},
+    h("label",{style:{fontFamily:"'DM Mono',monospace",fontSize:10,color:"#888",letterSpacing:1,display:"block",marginBottom:6}},"ATTENDEES (select all who are going)"),
+    h("div",{style:{maxHeight:180,overflowY:"auto"}},attendeePicker)
+  ),
+  h("div",{style:{marginBottom:12}},
+    h("label",{style:{fontFamily:"'DM Mono',monospace",fontSize:10,color:"#888",letterSpacing:1,display:"block",marginBottom:6}},"NOTE (optional)"),
+    h("input",{value:noteInput,onChange:function(e){setNoteInput(e.target.value);},placeholder:"e.g. Location, topic...",style:{width:"100%",padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontSize:13,background:"#FAFAFA"}})
+  ),
+  h("div",{style:{marginBottom:4}},
+    h("label",{style:{fontFamily:"'DM Mono',monospace",fontSize:10,color:"#888",letterSpacing:1,display:"block",marginBottom:6}},"TIME 24hr (optional)"),
+    h("div",{style:{display:"flex",gap:8,alignItems:"center"}},
+      h("input",{type:"time",value:form.startTime,onChange:function(e){var v=e.target.value;setForm({type:form.type,attendeeIds:form.attendeeIds,note:form.note,startTime:v,endTime:form.endTime});},style:{flex:1,padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Mono',monospace",fontSize:12,background:"#FAFAFA"}}),
+      h("span",{style:{color:"#aaa"}},"-"),
+      h("input",{type:"time",value:form.endTime,onChange:function(e){var v=e.target.value;setForm({type:form.type,attendeeIds:form.attendeeIds,note:form.note,startTime:form.startTime,endTime:v});},style:{flex:1,padding:"8px 10px",borderRadius:8,border:"1.5px solid #E0E0E0",fontFamily:"'DM Mono',monospace",fontSize:12,background:"#FAFAFA"}})
     )
-  );
+  )
+);
+```
 
-  var hasPassword=cal.password&&cal.password.length>0;
-  var canEdit=!hasPassword||unlocked||creator;
-
-  if(hasPassword&&!unlocked&&!creator&&!viewOnly) return h(PasswordGate,{
-    password:cal.password,
-    calName:cal.name,
-    onUnlock:function(){setUnlocked(true);},
-    onViewOnly:function(){setViewOnly(true);}
-  });
-
-  return h(CalendarApp,{calId:calId,canEdit:canEdit});
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(h(Root,null));
+function MonthGrid(){
+var cells=[];
+for(var i=0;i<firstDay(cur.year,cur.month);i++)cells.push(null);
+for(var d=1;d<=daysInMonth(cur.year,cur.month);d++)cells.push(d);
+while(cells.length%7!==0)cells.push(null);
+var hdrs=DAYS.map(function(d){return h(“div”,{key:d,style:{textAlign:“center”,fontFamily:”‘DM Mono’,monospace”,fontSize:11,fontWeight:600,color:”#888”,padding:“6px 0”,letterSpacing:1}},d);});
+var grid=cells.map(function(day,i){
+if(!day) return h(“div”,{key:“e”+i,style:{minHeight:80,background:”#FAFAFA”,borderRadius:8}});
+var key=dk(cur.year,cur.month,day);
+var dayEvs=events.filter(function(e){return e.date===key;});
+var isToday=cur.year===today.year&&cur.month===today.month&&day===today.day;
+var chips=dayEvs.slice(0,3).map(function(ev){
+return h(EventChip,{key:ev.id,ev:ev,people:people,compact:true,
+onClick:function(e){openEdit(ev,e);},
+onDragStart:onDragStart(ev.id),onDragEnd:onDragEnd});
+});
+if(dayEvs.length>3)chips.push(h(“div”,{key:“more”,style:{fontSize:10,color:”#aaa”,fontFamily:”‘DM Mono’,monospace”}},”+”+( dayEvs.length-3)+” more”));
+return h(“div”,{key:key,
+className:“day-cell”,
+onClick:function(){if(justDropped.current)return;openAdd(key);},
+onDragOver:onDragOver,
+onDrop:onDrop(key),
+style:{minHeight:80,background:isToday?”#FFF8EC”:”#fff”,border:isToday?“2px solid #E08A2E”:“1px solid #ECECEC”,borderRadius:8,padding:4,cursor:canEdit?“pointer”:“default”,boxShadow:“0 1px 3px rgba(0,0,0,.05)”}},
+h(“div”,{style:{fontSize:12,fontWeight:isToday?700:500,color:isToday?”#E08A2E”:”#444”,fontFamily:”‘DM Mono’,monospace”,marginBottom:3}},day),
+h(“div”,{style:{display:“flex”,flexDirection:“column”,gap:2}},chips)
+);
+});
+return h(“div”,null,
+h(“div”,{style:{display:“grid”,gridTemplateColumns:“repeat(7,1fr)”,gap:2}},hdrs),
+h(“div”,{style:{display:“grid”,gridTemplateColumns:“repeat(7,1fr)”,gap:2}},grid)
+);
+}
+
+function WeekGrid(){
+var days=[];
+for(var i=0;i<7;i++){var d=new Date(wk);d.setDate(d.getDate()+i);days.push(d);}
+var hdrs=days.map(function(d,i){
+var isToday=d.getFullYear()===today.year&&d.getMonth()===today.month&&d.getDate()===today.day;
+return h(“div”,{key:i,style:{textAlign:“center”,fontFamily:”‘DM Mono’,monospace”,fontSize:11,fontWeight:600,color:isToday?”#E08A2E”:”#888”,padding:“6px 0”}},DAYS[d.getDay()]+” “+d.getDate());
+});
+var cols=days.map(function(d,i){
+var key=dk(d.getFullYear(),d.getMonth(),d.getDate());
+var dayEvs=events.filter(function(e){return e.date===key;});
+var isToday=d.getFullYear()===today.year&&d.getMonth()===today.month&&d.getDate()===today.day;
+var chips=dayEvs.map(function(ev){
+return h(EventChip,{key:ev.id,ev:ev,people:people,compact:false,
+onClick:function(e){openEdit(ev,e);},
+onDragStart:onDragStart(ev.id),onDragEnd:onDragEnd});
+});
+if(dayEvs.length===0)chips.push(h(“div”,{key:“empty”,style:{fontSize:10,color:”#ddd”,fontFamily:”‘DM Mono’,monospace”,marginTop:8,textAlign:“center”}},canEdit?”+ add”:””));
+return h(“div”,{key:“c”+i,
+className:“day-cell”,
+onClick:function(){if(justDropped.current)return;openAdd(key);},
+onDragOver:onDragOver,
+onDrop:onDrop(key),
+style:{minHeight:200,background:isToday?”#FFF8EC”:”#fff”,border:isToday?“2px solid #E08A2E”:“1px solid #ECECEC”,borderRadius:8,padding:6,cursor:canEdit?“pointer”:“default”,boxShadow:“0 1px 3px rgba(0,0,0,.05)”}},
+h(“div”,{style:{display:“flex”,flexDirection:“column”,gap:3}},chips)
+);
+});
+return h(“div”,null,
+h(“div”,{style:{display:“grid”,gridTemplateColumns:“repeat(7,1fr)”,gap:2}},hdrs),
+h(“div”,{style:{display:“grid”,gridTemplateColumns:“repeat(7,1fr)”,gap:2}},cols)
+);
+}
+
+if(loading) return h(“div”,{style:{minHeight:“100vh”,background:”#F5F4F0”,display:“flex”,alignItems:“center”,justifyContent:“center”}},
+h(“div”,{style:{fontFamily:”‘DM Mono’,monospace”,color:”#aaa”,fontSize:13,letterSpacing:2}},“LOADING CALENDAR…”)
+);
+
+// Pattern legend
+var legend=EVENT_TYPES.map(function(t){
+var patternBg=pat(t);
+var bgSize=t===“Meet & Greet”?“6px 6px”:(t===“Hold”?“10px 10px”:“8px 8px”);
+return h(“div”,{key:t,style:{display:“flex”,alignItems:“center”,gap:7}},
+h(“div”,{style:{width:36,height:16,borderRadius:4,background:”#3A7FD5”,backgroundImage:patternBg,backgroundSize:bgSize,boxShadow:“0 1px 3px rgba(0,0,0,.15)”}}),
+h(“span”,{style:{fontFamily:”‘DM Mono’,monospace”,fontSize:11,color:”#666”,fontWeight:600}},t)
+);
+});
+
+// Team chips
+var teamChips=people.map(function(p){
+return h(“div”,{key:p.id,onClick:function(){if(!canEdit)return;setEditingName(p.id);setNameInput(p.name||””);},style:{display:“flex”,alignItems:“center”,gap:5,background:p.light,border:“2px solid “+p.color,borderRadius:20,padding:“4px 10px”,cursor:canEdit?“pointer”:“default”}},
+h(“div”,{style:{width:9,height:9,borderRadius:“50%”,background:p.color}}),
+editingName===p.id
+?h(“input”,{autoFocus:true,value:nameInput,onChange:function(e){setNameInput(e.target.value);},onBlur:function(){saveName(p.id);},onKeyDown:function(e){if(e.key===“Enter”)saveName(p.id);},style:{border:“none”,background:“transparent”,color:p.color,fontWeight:700,fontFamily:”‘DM Mono’,monospace”,fontSize:11,width:70,outline:“none”}})
+:h(“span”,{style:{color:p.color,fontWeight:700,fontFamily:”‘DM Mono’,monospace”,fontSize:11}},p.name||”-”)
+);
+});
+
+return h(“div”,{style:{minHeight:“100vh”,background:”#F5F4F0”,paddingBottom:60}},
+// Header
+h(“div”,{style:{background:”#1A1A2E”,padding:“18px 24px”,display:“flex”,alignItems:“center”,justifyContent:“space-between”,flexWrap:“wrap”,gap:12}},
+h(“div”,null,
+h(“div”,{style:{fontFamily:”‘DM Mono’,monospace”,fontSize:10,color:”#E08A2E”,letterSpacing:3,marginBottom:2}},“POLY TETRIS”),
+h(“div”,{style:{fontSize:18,fontWeight:700,color:”#fff”}},(calName||“Calendar”)+(canEdit?””:” (view only)”))
+),
+h(“div”,{style:{display:“flex”,gap:8,alignItems:“center”,flexWrap:“wrap”}},
+h(“div”,{style:{fontFamily:”‘DM Mono’,monospace”,fontSize:10,color:syncColor,padding:“4px 10px”,background:“rgba(255,255,255,.06)”,borderRadius:20}},syncLabel),
+h(“button”,{onClick:function(){navigator.clipboard.writeText(window.location.href).then(function(){setToast(true);setTimeout(function(){setToast(false);},2500);});},style:{background:“rgba(255,255,255,.1)”,border:“1px solid rgba(255,255,255,.2)”,borderRadius:8,padding:“6px 12px”,cursor:“pointer”,fontFamily:”‘DM Mono’,monospace”,fontSize:11,color:”#fff”,fontWeight:600}},“Share”),
+h(“button”,{onClick:function(){exportICS(events,people);},style:{background:“rgba(224,138,46,.15)”,border:“1px solid rgba(224,138,46,.4)”,borderRadius:8,padding:“6px 12px”,cursor:“pointer”,fontFamily:”‘DM Mono’,monospace”,fontSize:11,color:”#E08A2E”,fontWeight:600}},“Export .ics”),
+h(“button”,{onClick:function(){window.location.hash=””;window.location.reload();},style:{background:“rgba(255,255,255,.06)”,border:“1px solid rgba(255,255,255,.1)”,borderRadius:8,padding:“6px 12px”,cursor:“pointer”,fontFamily:”‘DM Mono’,monospace”,fontSize:11,color:”#aaa”,fontWeight:600}},“Home”),
+h(“div”,{style:{display:“flex”,gap:4,background:“rgba(255,255,255,.08)”,borderRadius:10,padding:4}},
+[“month”,“week”].map(function(v){return h(“button”,{key:v,onClick:function(){setView(v);},style:{background:view===v?”#E08A2E”:“transparent”,color:view===v?”#fff”:”#aaa”,border:“none”,borderRadius:7,padding:“5px 12px”,fontFamily:”‘DM Mono’,monospace”,fontSize:11,fontWeight:600,cursor:“pointer”,textTransform:“uppercase”}},v);})
+)
+)
+),
+
+```
+h("div",{style:{maxWidth:1100,margin:"0 auto",padding:"20px 12px"}},
+  // Team legend
+  h("div",{style:{background:"#fff",borderRadius:12,padding:"14px 18px",marginBottom:16,boxShadow:"0 2px 8px rgba(0,0,0,.06)"}},
+    h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:10,color:"#aaa",letterSpacing:2,marginBottom:8}},canEdit?"TEAM - click to rename":"TEAM"),
+    h("div",{style:{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}},
+      teamChips,
+      canEdit?h("div",{onClick:addPerson,style:{display:"flex",alignItems:"center",gap:5,background:"#F5F4F0",border:"2px dashed #ccc",borderRadius:20,padding:"4px 12px",cursor:"pointer"}},
+        h("span",{style:{color:"#aaa",fontWeight:700,fontFamily:"'DM Mono',monospace",fontSize:11}},"+ Add Person")
+      ):null
+    ),
+    h("div",{style:{borderTop:"1px solid #F0F0F0",paddingTop:8,display:"flex",gap:14,flexWrap:"wrap"}},legend)
+  ),
+
+  // Nav
+  h("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}},
+    h("button",{onClick:function(){
+      if(view==="month"){setCur(function(c){return c.month===0?{year:c.year-1,month:11}:{year:c.year,month:c.month-1};});}
+      else{setWk(function(d){var n=new Date(d);n.setDate(n.getDate()-7);return n;});}
+    },style:{background:"#fff",border:"1px solid #E0E0E0",borderRadius:8,padding:"6px 14px",cursor:"pointer",fontSize:16,fontWeight:600,color:"#555"}},"<"),
+    h("div",{style:{fontFamily:"'DM Mono',monospace",fontWeight:600,fontSize:14,color:"#1A1A2E"}},view==="month"?(MONTHS[cur.month]+" "+cur.year):weekLabel()),
+    h("button",{onClick:function(){
+      if(view==="month"){setCur(function(c){return c.month===11?{year:c.year+1,month:0}:{year:c.year,month:c.month+1};});}
+      else{setWk(function(d){var n=new Date(d);n.setDate(n.getDate()+7);return n;});}
+    },style:{background:"#fff",border:"1px solid #E0E0E0",borderRadius:8,padding:"6px 14px",cursor:"pointer",fontSize:16,fontWeight:600,color:"#555"}},">")
+  ),
+
+  h("div",{style:{background:"#fff",borderRadius:14,padding:10,boxShadow:"0 2px 12px rgba(0,0,0,.07)"}},
+    view==="month"?h(MonthGrid,null):h(WeekGrid,null)
+  )
+),
+
+// Toast
+toast?h("div",{style:{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",background:"#1A1A2E",color:"#4CAF6F",fontFamily:"'DM Mono',monospace",fontSize:12,fontWeight:600,padding:"10px 22px",borderRadius:30,zIndex:200}},"Link copied!"):null,
+
+// ADD Modal
+canEdit&&modal&&modal.mode==="add"?h("div",{style:ov,onClick:function(){setModal(null);}},
+  h("div",{onClick:function(e){e.stopPropagation();},style:mb},
+    h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#E08A2E",letterSpacing:2,marginBottom:4}},"NEW EVENT"),
+    h("div",{style:{fontSize:15,fontWeight:700,color:"#1A1A2E",marginBottom:16}},modal.date),
+    renderFormFields(),
+    h("div",{style:{display:"flex",gap:8,marginTop:16}},
+      h("button",{onClick:function(){setModal(null);},style:{flex:1,padding:"9px 0",borderRadius:9,background:"#F5F4F0",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:12,color:"#888",fontWeight:600}},"Cancel"),
+      h("button",{onClick:saveAdd,style:{flex:2,padding:"9px 0",borderRadius:9,background:"#1A1A2E",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:12,color:"#E08A2E",fontWeight:700}},"ADD EVENT")
+    )
+  )
+):null,
+
+// EDIT Modal
+canEdit&&modal&&modal.mode==="edit"?h("div",{style:ov,onClick:function(){setModal(null);}},
+  h("div",{onClick:function(e){e.stopPropagation();},style:mb},
+    h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#3A7FD5",letterSpacing:2,marginBottom:4}},"EDIT EVENT"),
+    h("div",{style:{fontSize:15,fontWeight:700,color:"#1A1A2E",marginBottom:8}},modal.date),
+    // Join button
+    h("button",{onClick:function(){setModal({date:modal.date,mode:"join",ev:modal.ev});},style:{width:"100%",padding:"8px",borderRadius:8,background:"#F0F7FF",border:"1.5px solid #3A7FD5",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#3A7FD5",fontWeight:600,marginBottom:16}},"+ Join this event as someone else"),
+    renderFormFields(),
+    h("div",{style:{display:"flex",gap:8,marginTop:16}},
+      h("button",{onClick:deleteEvent,style:{flex:1,padding:"9px 0",borderRadius:9,background:"#FEE8E8",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#D45050",fontWeight:700}},"DELETE"),
+      h("button",{onClick:function(){setModal(null);},style:{flex:1,padding:"9px 0",borderRadius:9,background:"#F5F4F0",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#888",fontWeight:600}},"Cancel"),
+      h("button",{onClick:saveEdit,style:{flex:2,padding:"9px 0",borderRadius:9,background:"#1A1A2E",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:11,color:"#E08A2E",fontWeight:700}},"SAVE")
+    )
+  )
+):null,
+
+// JOIN Modal
+canEdit&&modal&&modal.mode==="join"?h("div",{style:ov,onClick:function(){setModal(null);}},
+  h("div",{onClick:function(e){e.stopPropagation();},style:mb},
+    h("div",{style:{fontFamily:"'DM Mono',monospace",fontSize:11,color:"#4CAF6F",letterSpacing:2,marginBottom:4}},"JOIN EVENT"),
+    h("div",{style:{fontSize:15,fontWeight:700,color:"#1A1A2E",marginBottom:4}},modal.ev&&modal.ev.type),
+    h("div",{style:{fontSize:13,color:"#888",marginBottom:16}},modal.date),
+    h("p",{style:{fontSize:13,color:"#555",marginBottom:12}},"Who is joining this event?"),
+    h("div",null,people.map(function(p){
+      var existing=modal.ev?(modal.ev.attendeeIds||[modal.ev.personId]):[];
+      var already=existing.indexOf(p.id)!==-1;
+      return h("div",{key:p.id,onClick:function(){if(!already)saveJoin(p.id);},style:{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:10,marginBottom:6,background:already?"#F5F4F0":"#fff",border:already?"1.5px solid #ddd":"1.5px solid "+p.color,cursor:already?"default":"pointer",opacity:already?.6:1}},
+        h("div",{style:{width:12,height:12,borderRadius:"50%",background:p.color}}),
+        h("span",{style:{fontFamily:"'DM Mono',monospace",fontSize:12,fontWeight:600,color:already?"#aaa":p.color}},p.name||(p.id+"")),
+        already&&h("span",{style:{marginLeft:"auto",fontFamily:"'DM Mono',monospace",fontSize:10,color:"#aaa"}},"already attending")
+      );
+    })),
+    h("button",{onClick:function(){setModal(null);},style:{width:"100%",padding:"9px",borderRadius:9,background:"#F5F4F0",border:"none",cursor:"pointer",fontFamily:"'DM Mono',monospace",fontSize:12,color:"#888",fontWeight:600,marginTop:12}},"Cancel")
+  )
+):null
+```
+
+);
+}
+
+//  ROOT
+function Root() {
+var hs=useState(window.location.hash.replace(”#”,””));var calId=hs[0],setCalId=hs[1];
+var cs=useState(null);var cal=cs[0],setCal=cs[1];
+var us=useState(false);var unlocked=us[0],setUnlocked=us[1];
+var crs=useState(false);var creator=crs[0],setCreator=crs[1];
+var vos=useState(false);var viewOnly=vos[0],setViewOnly=vos[1];
+var ls=useState(false);var loading=ls[0],setLoading=ls[1];
+var errs=useState(null);var loadErr=errs[0],setLoadErr=errs[1];
+
+useEffect(function(){
+if(!calId)return;
+setLoading(true);setLoadErr(null);
+dbLoadCalendar(calId).then(function(data){setCal(data);setLoading(false);}).catch(function(e){
+console.error(“Load error:”, e);
+setLoadErr(“Network error - check your connection and try again.”);
+setLoading(false);
+});
+},[calId]);
+
+function enterCalendar(id, asCreator){
+setCalId(id);setCreator(asCreator);
+if(asCreator)setUnlocked(true);
+}
+
+if(!calId) return h(LandingPage,{onEnter:enterCalendar});
+
+if(loading) return h(“div”,{style:{minHeight:“100vh”,background:”#F5F4F0”,display:“flex”,alignItems:“center”,justifyContent:“center”}},
+h(“div”,{style:{fontFamily:”‘DM Mono’,monospace”,color:”#aaa”,fontSize:13,letterSpacing:2}},“LOADING…”)
+);
+
+if(!cal) return h(“div”,{style:{minHeight:“100vh”,background:”#F5F4F0”,display:“flex”,alignItems:“center”,justifyContent:“center”}},
+h(“div”,{style:{textAlign:“center”,padding:20}},
+h(“div”,{style:{fontFamily:”‘DM Mono’,monospace”,color:”#D45050”,fontSize:13,marginBottom:8}},loadErr||“Calendar not found.”),
+loadErr&&h(“div”,{style:{fontFamily:”‘DM Mono’,monospace”,color:”#aaa”,fontSize:11,marginBottom:16}},“Try refreshing or switching networks.”),
+h(“button”,{onClick:function(){setLoadErr(null);setLoading(true);dbLoadCalendar(calId).then(function(data){setCal(data);setLoading(false);}).catch(function(e){setLoadErr(“Network error - check your connection.”);setLoading(false);});},style:{background:”#3A7FD5”,color:”#fff”,border:“none”,borderRadius:8,padding:“10px 20px”,cursor:“pointer”,fontFamily:”‘DM Mono’,monospace”,fontSize:12,fontWeight:700,marginBottom:10,display:“block”,width:“100%”}},“RETRY”),
+h(“button”,{onClick:function(){window.location.hash=””;setCalId(””);},style:{background:”#1A1A2E”,color:”#E08A2E”,border:“none”,borderRadius:8,padding:“10px 20px”,cursor:“pointer”,fontFamily:”‘DM Mono’,monospace”,fontSize:12,fontWeight:700,display:“block”,width:“100%”}},“GO HOME”)
+)
+);
+
+var hasPassword=cal.password&&cal.password.length>0;
+var canEdit=!hasPassword||unlocked||creator;
+
+if(hasPassword&&!unlocked&&!creator&&!viewOnly) return h(PasswordGate,{
+password:cal.password,
+calName:cal.name,
+onUnlock:function(){setUnlocked(true);},
+onViewOnly:function(){setViewOnly(true);}
+});
+
+return h(CalendarApp,{calId:calId,canEdit:canEdit});
+}
+
+ReactDOM.createRoot(document.getElementById(“root”)).render(h(Root,null));
 </script>
+
 </body>
 </html>
