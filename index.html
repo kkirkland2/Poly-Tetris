@@ -432,7 +432,7 @@ function CalendarApp(props) {
 
   function openAdd(date){
     if(!canEdit)return;
-    setForm({type:"CE",attendeeIds:people.length>0?[people[0].id]:[],note:"",startTime:"",endTime:""});
+    setForm({type:"CE",attendeeIds:[],note:"",startTime:"",endTime:""});
     setNoteInput("");
     setModal({date:date,mode:"add"});
   }
